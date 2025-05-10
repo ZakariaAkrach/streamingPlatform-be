@@ -36,4 +36,3 @@ build/
 config.properties
 .env
 *.env
-*.properties
