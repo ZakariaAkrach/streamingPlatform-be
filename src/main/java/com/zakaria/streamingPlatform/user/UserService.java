@@ -7,6 +7,7 @@ import com.zakaria.streamingPlatform.mapper.UserMapper;
 import com.zakaria.streamingPlatform.models.UserModel;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponseToken;
+import com.zakaria.streamingPlatform.utils.Utils;
 import com.zakaria.streamingPlatform.validator.UserValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -40,64 +41,69 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
 
     public Response<UserModel> register(UserModel userModel) {
-        Response<UserModel> response = new Response<>();
         UserValidator userValidator = new UserValidator();
 
         List<String> errors = userValidator.validate(userModel);
 
         if (!errors.isEmpty()) {
-            response.setStatus(HttpStatus.BAD_REQUEST.value());
-            response.setMessage("Validation failed");
-            response.setError(errors);
-
-            return response;
+            return Utils.createResponse(HttpStatus.BAD_REQUEST.value(), "Validation failed", errors, null);
         }
-
         Optional<UserEntity> existEmail = userRepository.findByEmail(userModel.getEmail());
 
         if (existEmail.isPresent()) {
-            response.setStatus(HttpStatus.BAD_REQUEST.value());
-            response.setMessage("Email is already in use");
-            response.setError(List.of("Email is already in use"));
-            return response;
+            return Utils.createResponse(HttpStatus.BAD_REQUEST.value(),
+                    "Email is already in use", List.of("Email is already in use"), null);
         }
+        userModel = prepareUserForRegistration(userModel);
 
-        userModel.setPassword(bCryptPasswordEncoder.encode(userModel.getPassword()));
-        userModel.setDateCreated(LocalDate.now());
-        userModel.setActive(false);
-        userModel.setRole(Role.USER);
-        UserEntity userEntity = userMapper.convertToEntity(userModel);
-        UserEntity savedUser = userRepository.save(userEntity);
-
-        UserModel responseModel = userMapper.convertToModel(savedUser);
+        UserModel responseModel = userMapper.convertToModel(saveUser(userModel));
         responseModel.setPassword(null);
 
-        response.setStatus(HttpStatus.CREATED.value());
-        response.setMessage("User created successfully");
-        response.setData(responseModel);
-        return response;
+        return Utils.createResponse(HttpStatus.CREATED.value(), "User created successfully", null, responseModel);
+    }
+
+    public UserModel prepareUserForRegistration(UserModel userModel) {
+        userModel.setPassword(bCryptPasswordEncoder.encode(userModel.getPassword()));
+        userModel.setDateCreated(LocalDate.now());
+        userModel.setActive(true);
+        userModel.setRole(Role.USER);
+        return userModel;
+    }
+
+    public UserEntity saveUser(UserModel userModel) {
+        UserEntity userEntity = userMapper.convertToEntity(userModel);
+        return userRepository.save(userEntity);
     }
 
     public ResponseToken login(UserModel userModel) {
-        ResponseToken responseToken = new ResponseToken();
+        String errorMessageValidation = loginValidation(userModel.getEmail());
 
+        if (!errorMessageValidation.isEmpty()) {
+            return Utils.createResponseToken(HttpStatus.UNAUTHORIZED.value(), errorMessageValidation, null);
+        }
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userModel.getEmail(), userModel.getPassword()));
 
             if (authentication.isAuthenticated()) {
                 String token = jwtService.generateToken(userModel.getEmail());
-                responseToken.setStatus(HttpStatus.OK.value());
-                responseToken.setMessage("Token created successfully");
-                responseToken.setToken(token);
-                return responseToken;
+                return Utils.createResponseToken(HttpStatus.OK.value(), "Token created successfully", token);
             }
         } catch (AuthenticationException e) {
-            responseToken.setStatus(HttpStatus.UNAUTHORIZED.value());
-            responseToken.setMessage("Invalid credentials, token generation failed");
-            responseToken.setToken(null);
-            return responseToken;
+            return Utils.createResponseToken(HttpStatus.UNAUTHORIZED.value(), "Invalid credentials.", null);
         }
-        return responseToken;
+        return Utils.createResponseToken(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error during login.", null);
+    }
+
+    public String loginValidation(String email) {
+        Optional<UserEntity> findByEmail = userRepository.findByEmail(email);
+
+        if (findByEmail.isEmpty()) {
+            return "Email not found.";
+        }
+        if (!findByEmail.get().isActive()) {
+            return "Account deactivated. Please contact administration.";
+        }
+        return "";
     }
 }

@@ -1,6 +1,7 @@
 package com.zakaria.streamingPlatform.jwt;
 
 import com.zakaria.streamingPlatform.response.ResponseToken;
+import com.zakaria.streamingPlatform.utils.Utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -79,14 +80,9 @@ public class JWTService {
         String email = extractUsername(tokenExtracted);
         String generatedToken = generateToken(email);
 
-        if(generatedToken.isEmpty()) {
-            response.setStatus(HttpStatus.BAD_REQUEST.value());
-            response.setMessage("Error refresh token");
-            return response;
+        if (generatedToken.isEmpty()) {
+            return Utils.createResponseToken(HttpStatus.BAD_REQUEST.value(), "Error refresh token", null);
         }
-        response.setStatus(HttpStatus.OK.value());
-        response.setMessage("Token refreshed successfully");
-        response.setToken(generatedToken);
-        return response;
+        return Utils.createResponseToken(HttpStatus.OK.value(), "Token refreshed successfully", generatedToken);
     }
 }

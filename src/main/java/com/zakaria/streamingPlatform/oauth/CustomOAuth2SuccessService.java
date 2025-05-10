@@ -45,6 +45,7 @@ public class CustomOAuth2SuccessService implements AuthenticationSuccessHandler 
             userModel.setEmail(email);
             userModel.setUsername(name);
             userModel.setRole(Role.USER);
+            userModel.setActive(true);
             userModel.setPassword(generatePassword());
             userModel.setDateCreated(LocalDate.now());
 
@@ -53,8 +54,8 @@ public class CustomOAuth2SuccessService implements AuthenticationSuccessHandler 
         }
         String token = jwtService.generateToken(email);
 
-        //String redirectUrl = "http://localhost:5173/oauth2-redirect-handler?token=" + token;
-        String redirectUrl = "https://streaming-platform-fe.vercel.app/oauth2-redirect-handler?token=" + token;
+        String redirectUrl = "http://localhost:5173/oauth2-redirect-handler?token=" + token;
+        //String redirectUrl = "https://streaming-platform-fe.vercel.app/oauth2-redirect-handler?token=" + token;
         response.sendRedirect(redirectUrl);
     }
 
