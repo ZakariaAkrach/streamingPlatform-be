@@ -17,7 +17,7 @@ public class MovieMapper {
         return modelMapper.map(movieModel, MovieEntity.class);
     }
 
-    public MovieModel convertToModel(MovieModel movieModel) {
-        return modelMapper.map(movieModel, MovieModel.class);
+    public MovieModel convertToModel(MovieEntity movieEntity) {
+        return modelMapper.map(movieEntity, MovieModel.class);
     }
 }

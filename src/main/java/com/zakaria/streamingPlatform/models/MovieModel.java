@@ -12,14 +12,14 @@ public class MovieModel {
     private String posterPath; //img piccolo
     private String backdropPath; //img grande
     private LocalDate releaseDate;
+    private float popularity;
     private boolean active;
     private LocalDate dateCreated;
 
     public MovieModel() {
     }
 
-    public MovieModel(TypeMovie typeMovie, String language, String title, String description, String posterPath,
-                      String backdropPath, LocalDate releaseDate, boolean active, LocalDate dateCreated) {
+    public MovieModel(TypeMovie typeMovie, String language, String title, String description, String posterPath, String backdropPath, LocalDate releaseDate, float popularity, boolean active, LocalDate dateCreated) {
         this.typeMovie = typeMovie;
         this.language = language;
         this.title = title;
@@ -27,6 +27,7 @@ public class MovieModel {
         this.posterPath = posterPath;
         this.backdropPath = backdropPath;
         this.releaseDate = releaseDate;
+        this.popularity = popularity;
         this.active = active;
         this.dateCreated = dateCreated;
     }
@@ -85,6 +86,14 @@ public class MovieModel {
 
     public void setReleaseDate(LocalDate releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public float getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(float popularity) {
+        this.popularity = popularity;
     }
 
     public boolean isActive() {

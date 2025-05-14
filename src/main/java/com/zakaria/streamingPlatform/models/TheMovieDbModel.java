@@ -21,12 +21,15 @@ public class TheMovieDbModel {
     private boolean video;
     private float vote_average;
     private int vote_count;
+    private String name; //for tv show they use name instead of title
+    private LocalDate first_air_date;
 
     public TheMovieDbModel() {
     }
 
     public TheMovieDbModel(boolean adult, String backdrop_path, List<Integer> genre_ids, int id, String original_language,
-                           String original_title, String overview, float popularity, String poster_path, LocalDate release_date, String title, boolean video, float vote_average, int vote_count) {
+                           String original_title, String overview, float popularity, String poster_path, LocalDate release_date,
+                           String title, boolean video, float vote_average, int vote_count, String name, LocalDate first_air_date) {
         this.adult = adult;
         this.backdrop_path = backdrop_path;
         this.genre_ids = genre_ids;
@@ -41,6 +44,8 @@ public class TheMovieDbModel {
         this.video = video;
         this.vote_average = vote_average;
         this.vote_count = vote_count;
+        this.name = name;
+        this.first_air_date = first_air_date;
     }
 
     public boolean isAdult() {
@@ -153,5 +158,21 @@ public class TheMovieDbModel {
 
     public void setVote_count(int vote_count) {
         this.vote_count = vote_count;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public LocalDate getFirst_air_date() {
+        return first_air_date;
+    }
+
+    public void setFirst_air_date(LocalDate first_air_date) {
+        this.first_air_date = first_air_date;
     }
 }

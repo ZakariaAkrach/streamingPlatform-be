@@ -18,14 +18,14 @@ public class MovieEntity {
     private String posterPath; //img piccolo
     private String backdropPath; //img grande
     private LocalDate releaseDate;
+    private float popularity;
     private boolean active;
     private LocalDate dateCreated;
 
     public MovieEntity() {
     }
 
-    public MovieEntity(Long id, TypeMovie typeMovie, String language, String title, String description, String posterPath,
-                       String backdropPath, LocalDate releaseDate, boolean active, LocalDate dateCreated) {
+    public MovieEntity(Long id, TypeMovie typeMovie, String language, String title, String description, String posterPath, String backdropPath, LocalDate releaseDate, float popularity, boolean active, LocalDate dateCreated) {
         this.id = id;
         this.typeMovie = typeMovie;
         this.language = language;
@@ -34,12 +34,17 @@ public class MovieEntity {
         this.posterPath = posterPath;
         this.backdropPath = backdropPath;
         this.releaseDate = releaseDate;
+        this.popularity = popularity;
         this.active = active;
         this.dateCreated = dateCreated;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public TypeMovie getTypeMovie() {
@@ -96,6 +101,14 @@ public class MovieEntity {
 
     public void setReleaseDate(LocalDate releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public float getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(float popularity) {
+        this.popularity = popularity;
     }
 
     public boolean isActive() {
