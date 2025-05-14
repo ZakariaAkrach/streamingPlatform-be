@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieService {
@@ -174,11 +175,11 @@ public class MovieService {
         Response<MovieModel> response = new Response<>();
         List<MovieModel> movieModel = new ArrayList<>();
 
-        Pageable top24 = PageRequest.of(0, 24);
+        Pageable top24 = PageRequest.of(0, 10);
         List<MovieEntity> movieEntity = movieRepository.trendingByTypeMovie(TypeMovie.MOVIE, top24);
 
         if (!movieEntity.isEmpty()) {
-            movieModel = movieEntity.stream().map(movieMapper::convertToModel).toList();
+            movieModel = movieEntity.stream().map(movieMapper::convertToModel).collect(Collectors.toList());
             return Utils.createResponse(HttpStatus.OK.value(), "trending movie returned successfully", null, movieModel);
         }
         return Utils.createResponse(HttpStatus.NO_CONTENT.value(), "trending movies no data found", List.of("trending movies no data found"), null);
@@ -190,11 +191,11 @@ public class MovieService {
         Response<MovieModel> response = new Response<>();
         List<MovieModel> movieModel = new ArrayList<>();
 
-        Pageable top24 = PageRequest.of(0, 24);
+        Pageable top24 = PageRequest.of(0, 10);
         List<MovieEntity> movieEntity = movieRepository.trendingByTypeMovie(TypeMovie.TV_SHOW, top24);
 
         if (!movieEntity.isEmpty()) {
-            movieModel = movieEntity.stream().map(movieMapper::convertToModel).toList();
+            movieModel = movieEntity.stream().map(movieMapper::convertToModel).collect(Collectors.toList());
             return Utils.createResponse(HttpStatus.OK.value(), "trending tv shows returned successfully", null, movieModel);
         }
         return Utils.createResponse(HttpStatus.NO_CONTENT.value(), "trending tv shows no data found", List.of("trending tv shows no data found"), null);
