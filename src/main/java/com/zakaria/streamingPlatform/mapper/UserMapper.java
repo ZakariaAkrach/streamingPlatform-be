@@ -1,7 +1,7 @@
 package com.zakaria.streamingPlatform.mapper;
 
 import com.zakaria.streamingPlatform.entities.UserEntity;
-import com.zakaria.streamingPlatform.models.UserModel;
+import com.zakaria.streamingPlatform.dto.UserDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +13,11 @@ public class UserMapper {
         this.modelMapper = new ModelMapper();
     }
 
-    public UserEntity convertToEntity(UserModel userModel) {
-        return modelMapper.map(userModel, UserEntity.class);
+    public UserEntity convertToEntity(UserDTO userDTO) {
+        return modelMapper.map(userDTO, UserEntity.class);
     }
 
-    public UserModel convertToModel(UserEntity userEntity) {
-        return modelMapper.map(userEntity, UserModel.class);
+    public UserDTO convertToModel(UserEntity userEntity) {
+        return modelMapper.map(userEntity, UserDTO.class);
     }
 }

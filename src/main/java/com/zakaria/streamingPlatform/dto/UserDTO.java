@@ -1,10 +1,10 @@
-package com.zakaria.streamingPlatform.models;
+package com.zakaria.streamingPlatform.dto;
 
 import com.zakaria.streamingPlatform.entities.Role;
 
 import java.time.LocalDate;
 
-public class UserModel {
+public class UserDTO {
     private String username;
     private String email;
     private String password;
@@ -12,10 +12,10 @@ public class UserModel {
     private boolean active;
     private LocalDate dateCreated;
 
-    public UserModel() {
+    public UserDTO() {
     }
 
-    public UserModel(String username, String email, String password, Role role, boolean active, LocalDate dateCreated) {
+    public UserDTO(String username, String email, String password, Role role, boolean active, LocalDate dateCreated) {
         this.username = username;
         this.email = email;
         this.password = password;

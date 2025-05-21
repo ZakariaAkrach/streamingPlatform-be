@@ -16,7 +16,10 @@ import java.util.Optional;
 public interface MovieRepository extends JpaRepository<MovieEntity, Long> {
     Optional<MovieEntity> findByTitle(String title);
 
+    Optional<MovieEntity> findByIdTheMovieDb(int idTheMovieDb);
+
     Page<MovieEntity> findAllByTypeMovie(TypeMovie typeMovie, Pageable pageable);
+    List<MovieEntity> findAllByTypeMovie(TypeMovie typeMovie);
 
     @Query("SELECT m FROM MovieEntity m WHERE m.typeMovie = :typeMovie ORDER BY m.popularity DESC ")
     List<MovieEntity> trendingByTypeMovie(@Param("typeMovie") TypeMovie typeMovie, Pageable pageable);

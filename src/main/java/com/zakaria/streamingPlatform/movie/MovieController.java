@@ -1,6 +1,6 @@
 package com.zakaria.streamingPlatform.movie;
 
-import com.zakaria.streamingPlatform.models.MovieModel;
+import com.zakaria.streamingPlatform.dto.MovieDTO;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponsePagination;
 import org.springframework.data.domain.PageRequest;
@@ -29,7 +29,7 @@ public class MovieController {
     }
 
     @GetMapping("/get-all-movie")
-    public ResponsePagination<MovieModel> getAllMovie(
+    public ResponsePagination<MovieDTO> getAllMovie(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -40,12 +40,12 @@ public class MovieController {
     }
 
     @GetMapping("/get-trending-movie")
-    public Response<List<MovieModel>> getTrendingMovie() {
+    public Response<List<MovieDTO>> getTrendingMovie() {
         return movieService.getTrendingMovie();
     }
 
     @GetMapping("/get-trending-tv-show")
-    public Response<List<MovieModel>> getTrendingTvShow() {
+    public Response<List<MovieDTO>> getTrendingTvShow() {
         return movieService.getTrendingTvShow();
     }
 }

@@ -4,7 +4,7 @@ import com.zakaria.streamingPlatform.entities.Role;
 import com.zakaria.streamingPlatform.entities.UserEntity;
 import com.zakaria.streamingPlatform.jwt.JWTService;
 import com.zakaria.streamingPlatform.mapper.UserMapper;
-import com.zakaria.streamingPlatform.models.UserModel;
+import com.zakaria.streamingPlatform.dto.UserDTO;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponseToken;
 import com.zakaria.streamingPlatform.utils.Utils;
@@ -40,53 +40,53 @@ public class UserService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
 
-    public Response<UserModel> register(UserModel userModel) {
+    public Response<UserDTO> register(UserDTO userDTO) {
         UserValidator userValidator = new UserValidator();
 
-        List<String> errors = userValidator.validate(userModel);
+        List<String> errors = userValidator.validate(userDTO);
 
         if (!errors.isEmpty()) {
             return Utils.createResponse(HttpStatus.BAD_REQUEST.value(), "Validation failed", errors, null);
         }
-        Optional<UserEntity> existEmail = userRepository.findByEmail(userModel.getEmail());
+        Optional<UserEntity> existEmail = userRepository.findByEmail(userDTO.getEmail());
 
         if (existEmail.isPresent()) {
             return Utils.createResponse(HttpStatus.BAD_REQUEST.value(),
                     "Email is already in use", List.of("Email is already in use"), null);
         }
-        userModel = prepareUserForRegistration(userModel);
+        userDTO = prepareUserForRegistration(userDTO);
 
-        UserModel responseModel = userMapper.convertToModel(saveUser(userModel));
+        UserDTO responseModel = userMapper.convertToModel(saveUser(userDTO));
         responseModel.setPassword(null);
 
         return Utils.createResponse(HttpStatus.CREATED.value(), "User created successfully", null, responseModel);
     }
 
-    public UserModel prepareUserForRegistration(UserModel userModel) {
-        userModel.setPassword(bCryptPasswordEncoder.encode(userModel.getPassword()));
-        userModel.setDateCreated(LocalDate.now());
-        userModel.setActive(true);
-        userModel.setRole(Role.USER);
-        return userModel;
+    public UserDTO prepareUserForRegistration(UserDTO userDTO) {
+        userDTO.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
+        userDTO.setDateCreated(LocalDate.now());
+        userDTO.setActive(true);
+        userDTO.setRole(Role.USER);
+        return userDTO;
     }
 
-    public UserEntity saveUser(UserModel userModel) {
-        UserEntity userEntity = userMapper.convertToEntity(userModel);
+    public UserEntity saveUser(UserDTO userDTO) {
+        UserEntity userEntity = userMapper.convertToEntity(userDTO);
         return userRepository.save(userEntity);
     }
 
-    public ResponseToken login(UserModel userModel) {
-        String errorMessageValidation = loginValidation(userModel.getEmail());
+    public ResponseToken login(UserDTO userDTO) {
+        String errorMessageValidation = loginValidation(userDTO.getEmail());
 
         if (!errorMessageValidation.isEmpty()) {
             return Utils.createResponseToken(HttpStatus.UNAUTHORIZED.value(), errorMessageValidation, null);
         }
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userModel.getEmail(), userModel.getPassword()));
+                    new UsernamePasswordAuthenticationToken(userDTO.getEmail(), userDTO.getPassword()));
 
             if (authentication.isAuthenticated()) {
-                String token = jwtService.generateToken(userModel.getEmail());
+                String token = jwtService.generateToken(userDTO.getEmail());
                 return Utils.createResponseToken(HttpStatus.OK.value(), "Token created successfully", token);
             }
         } catch (AuthenticationException e) {

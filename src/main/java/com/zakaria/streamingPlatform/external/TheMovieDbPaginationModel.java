@@ -1,4 +1,4 @@
-package com.zakaria.streamingPlatform.models;
+package com.zakaria.streamingPlatform.external;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

@@ -4,7 +4,7 @@ import com.zakaria.streamingPlatform.entities.Role;
 import com.zakaria.streamingPlatform.entities.UserEntity;
 import com.zakaria.streamingPlatform.jwt.JWTService;
 import com.zakaria.streamingPlatform.mapper.UserMapper;
-import com.zakaria.streamingPlatform.models.UserModel;
+import com.zakaria.streamingPlatform.dto.UserDTO;
 import com.zakaria.streamingPlatform.user.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +34,7 @@ public class CustomOAuth2SuccessService implements AuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        UserModel userModel = new UserModel();
+        UserDTO userDTO = new UserDTO();
 
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
@@ -42,14 +42,14 @@ public class CustomOAuth2SuccessService implements AuthenticationSuccessHandler 
         Optional<UserEntity> existingEmail = userRepository.findByEmail(email);
 
         if (existingEmail.isEmpty()) {
-            userModel.setEmail(email);
-            userModel.setUsername(name);
-            userModel.setRole(Role.USER);
-            userModel.setActive(true);
-            userModel.setPassword(generatePassword());
-            userModel.setDateCreated(LocalDate.now());
+            userDTO.setEmail(email);
+            userDTO.setUsername(name);
+            userDTO.setRole(Role.USER);
+            userDTO.setActive(true);
+            userDTO.setPassword(generatePassword());
+            userDTO.setDateCreated(LocalDate.now());
 
-            UserEntity userEntity = userMapper.convertToEntity(userModel);
+            UserEntity userEntity = userMapper.convertToEntity(userDTO);
             userRepository.save(userEntity);
         }
         String token = jwtService.generateToken(email);

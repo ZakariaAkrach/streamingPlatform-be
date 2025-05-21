@@ -1,6 +1,6 @@
 package com.zakaria.streamingPlatform.user;
 
-import com.zakaria.streamingPlatform.models.UserModel;
+import com.zakaria.streamingPlatform.dto.UserDTO;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponseToken;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,12 +18,12 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Response<UserModel> register(@RequestBody UserModel userModel) {
-        return userService.register(userModel);
+    public Response<UserDTO> register(@RequestBody UserDTO userDTO) {
+        return userService.register(userDTO);
     }
 
     @PostMapping("/login")
-    public ResponseToken login(@RequestBody UserModel userModel) {
-        return userService.login(userModel);
+    public ResponseToken login(@RequestBody UserDTO userDTO) {
+        return userService.login(userDTO);
     }
 }

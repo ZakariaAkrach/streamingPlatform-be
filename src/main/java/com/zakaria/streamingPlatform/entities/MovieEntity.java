@@ -3,6 +3,7 @@ package com.zakaria.streamingPlatform.entities;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "movie")
@@ -10,23 +11,48 @@ public class MovieEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private int idTheMovieDb;
     private TypeMovie typeMovie;
     private String language;
     private String title;
     @Lob
     private String description;
-    private String posterPath; //img piccolo
-    private String backdropPath; //img grande
+    private String posterPath; //img small
+    private String backdropPath; //img big
     private LocalDate releaseDate;
     private float popularity;
+    private int runtime; //movie hours
+
+    @OneToMany(mappedBy = "movie")
+    private List<SeasonEntity> seasons;
+
     private boolean active;
+
+    @ManyToMany
+    @JoinTable(
+            name = "movie_genre",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private List<GenresEntity> genres;
+
+    @ManyToMany
+    @JoinTable(
+            name = "movie_cast",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "cast_id")
+    )
+    private List<CastEntity> cast;
+
     private LocalDate dateCreated;
 
     public MovieEntity() {
     }
 
-    public MovieEntity(Long id, TypeMovie typeMovie, String language, String title, String description, String posterPath, String backdropPath, LocalDate releaseDate, float popularity, boolean active, LocalDate dateCreated) {
+    public MovieEntity(Long id, int idTheMovieDb, TypeMovie typeMovie, String language, String title,
+                       String description, String posterPath, String backdropPath, LocalDate releaseDate, float popularity, int runtime, List<SeasonEntity> seasons, boolean active, List<GenresEntity> genres, List<CastEntity> cast, LocalDate dateCreated) {
         this.id = id;
+        this.idTheMovieDb = idTheMovieDb;
         this.typeMovie = typeMovie;
         this.language = language;
         this.title = title;
@@ -35,7 +61,11 @@ public class MovieEntity {
         this.backdropPath = backdropPath;
         this.releaseDate = releaseDate;
         this.popularity = popularity;
+        this.runtime = runtime;
+        this.seasons = seasons;
         this.active = active;
+        this.genres = genres;
+        this.cast = cast;
         this.dateCreated = dateCreated;
     }
 
@@ -45,6 +75,14 @@ public class MovieEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public int getIdTheMovieDb() {
+        return idTheMovieDb;
+    }
+
+    public void setIdTheMovieDb(int idTheMovieDb) {
+        this.idTheMovieDb = idTheMovieDb;
     }
 
     public TypeMovie getTypeMovie() {
@@ -111,12 +149,44 @@ public class MovieEntity {
         this.popularity = popularity;
     }
 
+    public int getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(int runtime) {
+        this.runtime = runtime;
+    }
+
+    public List<SeasonEntity> getSeasons() {
+        return seasons;
+    }
+
+    public void setSeasons(List<SeasonEntity> seasons) {
+        this.seasons = seasons;
+    }
+
     public boolean isActive() {
         return active;
     }
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public List<GenresEntity> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<GenresEntity> genres) {
+        this.genres = genres;
+    }
+
+    public List<CastEntity> getCast() {
+        return cast;
+    }
+
+    public void setCast(List<CastEntity> cast) {
+        this.cast = cast;
     }
 
     public LocalDate getDateCreated() {

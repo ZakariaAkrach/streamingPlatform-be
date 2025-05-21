@@ -1,25 +1,31 @@
-package com.zakaria.streamingPlatform.models;
+package com.zakaria.streamingPlatform.dto;
 
 import com.zakaria.streamingPlatform.entities.TypeMovie;
 
 import java.time.LocalDate;
+import java.util.List;
 
-public class MovieModel {
+public class MovieDTO {
+    private int idTheMovieDb;
     private TypeMovie typeMovie;
     private String language;
     private String title;
     private String description;
-    private String posterPath; //img piccolo
-    private String backdropPath; //img grande
+    private String posterPath; //img small
+    private String backdropPath; //img big
     private LocalDate releaseDate;
     private float popularity;
     private boolean active;
     private LocalDate dateCreated;
+    private List<GenresDTO> genres;
+    private List<CastDTO> cast;
 
-    public MovieModel() {
+    public MovieDTO() {
     }
 
-    public MovieModel(TypeMovie typeMovie, String language, String title, String description, String posterPath, String backdropPath, LocalDate releaseDate, float popularity, boolean active, LocalDate dateCreated) {
+    public MovieDTO(int idTheMovieDb, TypeMovie typeMovie, String language, String title, String description,
+                    String posterPath, String backdropPath, LocalDate releaseDate, float popularity, boolean active, LocalDate dateCreated, List<GenresDTO> genres, List<CastDTO> cast) {
+        this.idTheMovieDb = idTheMovieDb;
         this.typeMovie = typeMovie;
         this.language = language;
         this.title = title;
@@ -30,6 +36,16 @@ public class MovieModel {
         this.popularity = popularity;
         this.active = active;
         this.dateCreated = dateCreated;
+        this.genres = genres;
+        this.cast = cast;
+    }
+
+    public int getIdTheMovieDb() {
+        return idTheMovieDb;
+    }
+
+    public void setIdTheMovieDb(int idTheMovieDb) {
+        this.idTheMovieDb = idTheMovieDb;
     }
 
     public TypeMovie getTypeMovie() {
@@ -110,5 +126,21 @@ public class MovieModel {
 
     public void setDateCreated(LocalDate dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    public List<GenresDTO> getGenres() {
+        return genres;
+    }
+
+    public void setGenres(List<GenresDTO> genres) {
+        this.genres = genres;
+    }
+
+    public List<CastDTO> getCast() {
+        return cast;
+    }
+
+    public void setCast(List<CastDTO> cast) {
+        this.cast = cast;
     }
 }
