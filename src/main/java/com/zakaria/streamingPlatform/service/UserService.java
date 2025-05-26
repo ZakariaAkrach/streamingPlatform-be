@@ -1,4 +1,4 @@
-package com.zakaria.streamingPlatform.user;
+package com.zakaria.streamingPlatform.service;
 
 import com.zakaria.streamingPlatform.entities.Role;
 import com.zakaria.streamingPlatform.entities.UserEntity;
@@ -7,6 +7,7 @@ import com.zakaria.streamingPlatform.mapper.UserMapper;
 import com.zakaria.streamingPlatform.dto.UserDTO;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponseToken;
+import com.zakaria.streamingPlatform.repository.UserRepository;
 import com.zakaria.streamingPlatform.utils.Utils;
 import com.zakaria.streamingPlatform.validator.UserValidator;
 import org.springframework.http.HttpStatus;

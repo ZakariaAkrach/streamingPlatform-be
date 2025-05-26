@@ -39,13 +39,17 @@ public class MovieEntity {
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
     private List<MovieCastEntity> movieCast;
 
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    private List<CommentEntity> comments;
+
     private LocalDate dateCreated;
 
     public MovieEntity() {
     }
 
-    public MovieEntity(Long id, int idTheMovieDb, TypeMovie typeMovie, String language, String title,
-                       String description, String posterPath, String backdropPath, LocalDate releaseDate, float popularity, int runtime, List<SeasonEntity> seasons, boolean active, List<GenresEntity> genres, List<MovieCastEntity> movieCast, LocalDate dateCreated) {
+    public MovieEntity(Long id, int idTheMovieDb, TypeMovie typeMovie, String language, String title, String description,
+                       String posterPath, String backdropPath, LocalDate releaseDate, float popularity, int runtime,
+                       List<SeasonEntity> seasons, boolean active, List<GenresEntity> genres, List<MovieCastEntity> movieCast, List<CommentEntity> comments, LocalDate dateCreated) {
         this.id = id;
         this.idTheMovieDb = idTheMovieDb;
         this.typeMovie = typeMovie;
@@ -61,6 +65,7 @@ public class MovieEntity {
         this.active = active;
         this.genres = genres;
         this.movieCast = movieCast;
+        this.comments = comments;
         this.dateCreated = dateCreated;
     }
 
@@ -182,6 +187,14 @@ public class MovieEntity {
 
     public void setMovieCast(List<MovieCastEntity> movieCast) {
         this.movieCast = movieCast;
+    }
+
+    public List<CommentEntity> getComments() {
+        return comments;
+    }
+
+    public void setComment(List<CommentEntity> comments) {
+        this.comments = comments;
     }
 
     public LocalDate getDateCreated() {

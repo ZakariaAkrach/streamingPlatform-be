@@ -1,4 +1,4 @@
-package com.zakaria.streamingPlatform.movie;
+package com.zakaria.streamingPlatform.service;
 
 import com.zakaria.streamingPlatform.dto.CastDTO;
 import com.zakaria.streamingPlatform.dto.GenresDTO;
@@ -15,6 +15,7 @@ import com.zakaria.streamingPlatform.mapper.CastMapper;
 import com.zakaria.streamingPlatform.mapper.GenresMapper;
 import com.zakaria.streamingPlatform.mapper.MovieMapper;
 import com.zakaria.streamingPlatform.mapper.SeasonMapper;
+import com.zakaria.streamingPlatform.repository.*;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponsePagination;
 import com.zakaria.streamingPlatform.utils.Utils;

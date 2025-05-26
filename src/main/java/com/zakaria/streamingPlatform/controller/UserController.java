@@ -1,8 +1,9 @@
-package com.zakaria.streamingPlatform.user;
+package com.zakaria.streamingPlatform.controller;
 
 import com.zakaria.streamingPlatform.dto.UserDTO;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponseToken;
+import com.zakaria.streamingPlatform.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

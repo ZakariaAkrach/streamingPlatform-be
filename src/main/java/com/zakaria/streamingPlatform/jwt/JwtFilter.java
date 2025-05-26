@@ -1,6 +1,6 @@
 package com.zakaria.streamingPlatform.jwt;
 
-import com.zakaria.streamingPlatform.user.CustomUserDetailsService;
+import com.zakaria.streamingPlatform.security.user.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

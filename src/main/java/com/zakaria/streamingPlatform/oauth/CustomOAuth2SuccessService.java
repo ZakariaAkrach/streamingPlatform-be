@@ -5,7 +5,7 @@ import com.zakaria.streamingPlatform.entities.UserEntity;
 import com.zakaria.streamingPlatform.jwt.JWTService;
 import com.zakaria.streamingPlatform.mapper.UserMapper;
 import com.zakaria.streamingPlatform.dto.UserDTO;
-import com.zakaria.streamingPlatform.user.UserRepository;
+import com.zakaria.streamingPlatform.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

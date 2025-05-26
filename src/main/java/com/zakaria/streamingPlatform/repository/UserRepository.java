@@ -1,4 +1,4 @@
-package com.zakaria.streamingPlatform.user;
+package com.zakaria.streamingPlatform.repository;
 
 import com.zakaria.streamingPlatform.entities.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

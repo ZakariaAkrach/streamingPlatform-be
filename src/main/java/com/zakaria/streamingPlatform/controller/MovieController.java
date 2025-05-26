@@ -1,6 +1,7 @@
-package com.zakaria.streamingPlatform.movie;
+package com.zakaria.streamingPlatform.controller;
 
 import com.zakaria.streamingPlatform.dto.MovieDTO;
+import com.zakaria.streamingPlatform.service.MovieService;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponsePagination;
 import org.springframework.data.domain.PageRequest;

@@ -1,6 +1,7 @@
-package com.zakaria.streamingPlatform.user;
+package com.zakaria.streamingPlatform.security.user;
 
 import com.zakaria.streamingPlatform.entities.UserEntity;
+import com.zakaria.streamingPlatform.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
