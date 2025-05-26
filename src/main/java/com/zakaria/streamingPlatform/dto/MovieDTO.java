@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class MovieDTO {
+    private int id;
     private int idTheMovieDb;
     private TypeMovie typeMovie;
     private String language;
@@ -18,13 +19,16 @@ public class MovieDTO {
     private boolean active;
     private LocalDate dateCreated;
     private List<GenresDTO> genres;
-    private List<CastDTO> cast;
+    private List<MovieCastDTO> movieCast;
+    private int runtime; //movie hours
 
     public MovieDTO() {
     }
 
-    public MovieDTO(int idTheMovieDb, TypeMovie typeMovie, String language, String title, String description,
-                    String posterPath, String backdropPath, LocalDate releaseDate, float popularity, boolean active, LocalDate dateCreated, List<GenresDTO> genres, List<CastDTO> cast) {
+    public MovieDTO(int id, int idTheMovieDb, TypeMovie typeMovie, String language, String title, String description,
+                    String posterPath, String backdropPath, LocalDate releaseDate, float popularity, boolean active,
+                    LocalDate dateCreated, List<GenresDTO> genres, List<MovieCastDTO> movieCast, int runtime) {
+        this.id = id;
         this.idTheMovieDb = idTheMovieDb;
         this.typeMovie = typeMovie;
         this.language = language;
@@ -37,7 +41,16 @@ public class MovieDTO {
         this.active = active;
         this.dateCreated = dateCreated;
         this.genres = genres;
-        this.cast = cast;
+        this.movieCast = movieCast;
+        this.runtime = runtime;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getIdTheMovieDb() {
@@ -136,11 +149,19 @@ public class MovieDTO {
         this.genres = genres;
     }
 
-    public List<CastDTO> getCast() {
-        return cast;
+    public List<MovieCastDTO> getMovieCast() {
+        return movieCast;
     }
 
-    public void setCast(List<CastDTO> cast) {
-        this.cast = cast;
+    public void setMovieCast(List<MovieCastDTO> movieCast) {
+        this.movieCast = movieCast;
+    }
+
+    public int getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(int runtime) {
+        this.runtime = runtime;
     }
 }

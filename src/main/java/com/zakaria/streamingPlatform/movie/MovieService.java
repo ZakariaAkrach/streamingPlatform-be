@@ -44,17 +44,20 @@ public class MovieService {
     private final GenresRepository genresRepository;
     private final CastRepository castRepository;
     private final SeasonRepository seasonRepository;
+    private final MovieCastRepository movieCastRepository;
     private final GenresMapper genresMapper;
     private final CastMapper castMapper;
     private final SeasonMapper seasonMapper;
 
     public MovieService(MovieRepository movieRepository, MovieMapper movieMapper, GenresRepository genresRepository,
-                        CastRepository castRepository, SeasonRepository seasonRepository, GenresMapper genresMapper, CastMapper castMapper, SeasonMapper seasonMapper) {
+                        CastRepository castRepository, SeasonRepository seasonRepository, MovieCastRepository movieCastRepository,
+                        GenresMapper genresMapper, CastMapper castMapper, SeasonMapper seasonMapper) {
         this.movieRepository = movieRepository;
         this.movieMapper = movieMapper;
         this.genresRepository = genresRepository;
         this.castRepository = castRepository;
         this.seasonRepository = seasonRepository;
+        this.movieCastRepository = movieCastRepository;
         this.genresMapper = genresMapper;
         this.castMapper = castMapper;
         this.seasonMapper = seasonMapper;
@@ -95,7 +98,6 @@ public class MovieService {
                 if (existingMovie.isEmpty()) {
                     MovieEntity movieEntity = movieMapper.convertToEntity(singleMovieDTO);
                     movieEntity.setGenres(new ArrayList<>());
-                    movieEntity.setCast(new ArrayList<>());
                     movieRepository.save(movieEntity);
                     countMovieAdded++;
                     logger.info("Added movie {}", singleMovieDTO.getTitle());
@@ -118,9 +120,9 @@ public class MovieService {
         }
 
         for (MovieEntity movieEntity : allMovie) {
+            logger.info("Processing {} title {}", typeMovieApi, movieEntity.getTitle());
             List<TheMovieDbDetailModel> listTheMovieDbDetailModel = getDetailMovies(typeMovieApi, movieEntity.getIdTheMovieDb());
             List<GenresEntity> genresEntitiesList = new ArrayList<>();
-            List<CastEntity> castEntitiesList = new ArrayList<>();
             List<SeasonEntity> seasonEntityList = new ArrayList<>();
             for (TheMovieDbDetailModel theMovieDbDetailModel : listTheMovieDbDetailModel) {
                 if (theMovieDbDetailModel.getGenres() != null && theMovieDbDetailModel.getCredits() != null) {
@@ -134,13 +136,21 @@ public class MovieService {
                         }
                     }
                     for (TheMovieDbCastModel theMovieDbCreditsModel : theMovieDbDetailModel.getCredits().getCast()) {
-                        Optional<CastEntity> castEntity = castRepository.findByName(theMovieDbCreditsModel.getName());
-                        if (castEntity.isEmpty()) {
+                        Optional<CastEntity> castEntityOptional = castRepository.findByName(theMovieDbCreditsModel.getName());
+                        MovieCastEntity movieCastEntity = new MovieCastEntity();
+                        CastEntity castEntity;
+
+                        movieCastEntity.setMovie(movieEntity);
+                        movieCastEntity.setCharacterName(theMovieDbCreditsModel.getCharacter());
+
+                        if (castEntityOptional.isEmpty()) {
                             CastDTO castDTO = setCastDTOBeforeSaving(theMovieDbCreditsModel);
-                            castEntitiesList.add(castRepository.save(castMapper.convertToEntity(castDTO)));
+                            castEntity = castRepository.save(castMapper.convertToEntity(castDTO));
                         } else {
-                            castEntitiesList.add(castEntity.get());
+                            castEntity = castEntityOptional.get();
                         }
+                        movieCastEntity.setCast(castEntity);
+                        movieCastRepository.save(movieCastEntity);
                     }
                     if (typeMovieApi.equals("tv")) {
                         for (TheMovieDbSeason theMovieDbSeason : theMovieDbDetailModel.getSeasons()) {
@@ -156,8 +166,8 @@ public class MovieService {
                 }
             }
             movieEntity.setGenres(genresEntitiesList);
-            movieEntity.setCast(castEntitiesList);
             movieEntity.setSeasons(seasonEntityList);
+            movieEntity.setRuntime(listTheMovieDbDetailModel.get(0).getRuntime()); //it is always the index 0
             movieRepository.save(movieEntity);
         }
     }
@@ -296,7 +306,6 @@ public class MovieService {
         CastDTO castDTO = new CastDTO();
         castDTO.setName(theMovieDbCreditsModel.getName());
         castDTO.setOriginal_name(theMovieDbCreditsModel.getOriginal_name());
-        castDTO.setCharacter(theMovieDbCreditsModel.getCharacter());
         castDTO.setProfile_path(theMovieDbCreditsModel.getProfile_path());
 
         return castDTO;
@@ -328,7 +337,7 @@ public class MovieService {
 
     @Cacheable("getTrendingMovie")
     public Response<List<MovieDTO>> getTrendingMovie() {
-        List<MovieDTO> movieDTO = new ArrayList<>();
+        List<MovieDTO> movieDTO;
 
         Pageable top24 = PageRequest.of(0, 24);
         List<MovieEntity> movieEntity = movieRepository.trendingByTypeMovie(TypeMovie.MOVIE, top24);
@@ -343,7 +352,7 @@ public class MovieService {
 
     @Cacheable("getTrendingTvShow")
     public Response<List<MovieDTO>> getTrendingTvShow() {
-        List<MovieDTO> movieDTO = new ArrayList<>();
+        List<MovieDTO> movieDTO;
 
         Pageable top24 = PageRequest.of(0, 24);
         List<MovieEntity> movieEntity = movieRepository.trendingByTypeMovie(TypeMovie.TV_SHOW, top24);
