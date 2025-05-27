@@ -330,9 +330,11 @@ public class MovieService {
             movieDTO = movieEntityPage.get()
                     .map(movieMapper::convertToModel)
                     .toList();
+            logger.info("Get all movies successfully");
             return Utils.createResponsePagination(HttpStatus.OK.value(), "Get all movies successfully", movieDTO, pageable.getPageNumber(),
                     pageable.getPageSize(), movieEntityPage.getTotalPages(), movieEntityPage.getTotalElements(), movieEntityPage.isLast(), null);
         }
+        logger.info("No movie available");
         return Utils.createResponsePagination(HttpStatus.NO_CONTENT.value(), "No movie available", "No movie available");
     }
 
@@ -345,8 +347,10 @@ public class MovieService {
 
         if (!movieEntity.isEmpty()) {
             movieDTO = movieEntity.stream().map(movieMapper::convertToModel).collect(Collectors.toList());
+            logger.info("trending movie returned successfully");
             return Utils.createResponse(HttpStatus.OK.value(), "trending movie returned successfully", null, movieDTO);
         }
+        logger.info("trending movies no data found");
         return Utils.createResponse(HttpStatus.NO_CONTENT.value(), "trending movies no data found", List.of("trending movies no data found"), null);
     }
 
@@ -360,8 +364,10 @@ public class MovieService {
 
         if (!movieEntity.isEmpty()) {
             movieDTO = movieEntity.stream().map(movieMapper::convertToModel).collect(Collectors.toList());
+            logger.info("trending tv shows returned successfully");
             return Utils.createResponse(HttpStatus.OK.value(), "trending tv shows returned successfully", null, movieDTO);
         }
+        logger.info("trending tv shows no data found");
         return Utils.createResponse(HttpStatus.NO_CONTENT.value(), "trending tv shows no data found", List.of("trending tv shows no data found"), null);
     }
 }

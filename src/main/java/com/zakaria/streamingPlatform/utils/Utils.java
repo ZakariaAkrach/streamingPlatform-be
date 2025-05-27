@@ -1,8 +1,12 @@
 package com.zakaria.streamingPlatform.utils;
 
+import com.zakaria.streamingPlatform.entities.UserEntity;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponsePagination;
 import com.zakaria.streamingPlatform.response.ResponseToken;
+import com.zakaria.streamingPlatform.security.user.CustomUserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -60,5 +64,12 @@ public final class Utils {
         response.setMessage(message);
         response.setError(error);
         return response;
+    }
+
+    public static UserEntity getCurrentUserEntity() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        return customUserDetails.getUser();
     }
 }

@@ -2,6 +2,8 @@ package com.zakaria.streamingPlatform.security.user;
 
 import com.zakaria.streamingPlatform.entities.UserEntity;
 import com.zakaria.streamingPlatform.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,12 +19,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<UserEntity> userEntity = userRepository.findByEmail(email);
 
         if (userEntity.isEmpty()) {
-            System.out.println("User not found");
+            logger.info("User not found");
             throw new UsernameNotFoundException("User not found");
         }
         return new CustomUserDetails(userEntity.get());
