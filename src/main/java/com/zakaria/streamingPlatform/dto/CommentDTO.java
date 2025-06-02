@@ -1,32 +1,30 @@
 package com.zakaria.streamingPlatform.dto;
 
-import com.zakaria.streamingPlatform.entities.CommentEntity;
-
 import java.time.LocalDateTime;
 
 public class CommentDTO {
     private Long id;
     private LocalDateTime date;
     private String content;
-    private Integer likes;
-    private Integer dislike;
     private Boolean approved;
-    private MovieDTO movie;
-    private CommentDTO parentComment; //Nested comments
+    private Long movieId;
+    private Long parentComment; //Nested comments
+    private UserPublicDTO user;
+    private Boolean likedByCurrentUser;
 
     public CommentDTO() {
     }
 
-    public CommentDTO(Long id, LocalDateTime date, String content, Integer likes, Integer dislike,
-                      Boolean approved, MovieDTO movie, CommentDTO parentComment) {
+    public CommentDTO(Long id, LocalDateTime date, String content, Boolean approved,
+                      Long movieId, Long parentComment, UserPublicDTO user, Boolean likedByCurrentUser) {
         this.id = id;
         this.date = date;
         this.content = content;
-        this.likes = likes;
-        this.dislike = dislike;
         this.approved = approved;
-        this.movie = movie;
+        this.movieId = movieId;
         this.parentComment = parentComment;
+        this.user = user;
+        this.likedByCurrentUser = likedByCurrentUser;
     }
 
     public Long getId() {
@@ -53,22 +51,6 @@ public class CommentDTO {
         this.content = content;
     }
 
-    public Integer getLikes() {
-        return likes;
-    }
-
-    public void setLikes(Integer likes) {
-        this.likes = likes;
-    }
-
-    public Integer getDislike() {
-        return dislike;
-    }
-
-    public void setDislike(Integer dislike) {
-        this.dislike = dislike;
-    }
-
     public Boolean getApproved() {
         return approved;
     }
@@ -77,19 +59,35 @@ public class CommentDTO {
         this.approved = approved;
     }
 
-    public MovieDTO getMovie() {
-        return movie;
+    public Long getMovieId() {
+        return movieId;
     }
 
-    public void setMovie(MovieDTO movie) {
-        this.movie = movie;
+    public void setMovieId(Long movieId) {
+        this.movieId = movieId;
     }
 
-    public CommentDTO getParentComment() {
+    public Long getParentComment() {
         return parentComment;
     }
 
-    public void setParentComment(CommentDTO parentComment) {
+    public void setParentComment(Long parentComment) {
         this.parentComment = parentComment;
+    }
+
+    public UserPublicDTO getUser() {
+        return user;
+    }
+
+    public void setUser(UserPublicDTO user) {
+        this.user = user;
+    }
+
+    public Boolean isLikedByCurrentUser() {
+        return likedByCurrentUser;
+    }
+
+    public void setLikedByCurrentUser(Boolean likedByCurrentUser) {
+        this.likedByCurrentUser = likedByCurrentUser;
     }
 }

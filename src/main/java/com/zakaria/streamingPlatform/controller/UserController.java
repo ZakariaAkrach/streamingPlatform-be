@@ -1,13 +1,11 @@
 package com.zakaria.streamingPlatform.controller;
 
 import com.zakaria.streamingPlatform.dto.UserDTO;
+import com.zakaria.streamingPlatform.dto.UserPublicDTO;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponseToken;
 import com.zakaria.streamingPlatform.service.UserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -26,5 +24,10 @@ public class UserController {
     @PostMapping("/login")
     public ResponseToken login(@RequestBody UserDTO userDTO) {
         return userService.login(userDTO);
+    }
+
+    @GetMapping("user-info")
+    public Response<UserPublicDTO> getUserInfo() {
+        return userService.getUserInfo();
     }
 }

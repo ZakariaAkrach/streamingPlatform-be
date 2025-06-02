@@ -12,8 +12,6 @@ public class CommentEntity {
     private Long id;
     private LocalDateTime date;
     private String content;
-    private Integer likes;
-    private Integer dislike;
     private Boolean approved; //for admin to disactivated it
 
     @ManyToOne
@@ -31,13 +29,11 @@ public class CommentEntity {
     public CommentEntity() {
     }
 
-    public CommentEntity(Long id, LocalDateTime date, String content, Integer likes, Integer dislike, Boolean approved,
-                         MovieEntity movie, UserEntity user, CommentEntity parentComment) {
+    public CommentEntity(Long id, LocalDateTime date, String content, Boolean approved, MovieEntity movie,
+                         UserEntity user, CommentEntity parentComment) {
         this.id = id;
         this.date = date;
         this.content = content;
-        this.likes = likes;
-        this.dislike = dislike;
         this.approved = approved;
         this.movie = movie;
         this.user = user;
@@ -66,22 +62,6 @@ public class CommentEntity {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public Integer getLikes() {
-        return likes;
-    }
-
-    public void setLike(Integer likes) {
-        this.likes = likes;
-    }
-
-    public Integer getDislike() {
-        return dislike;
-    }
-
-    public void setDislike(Integer dislike) {
-        this.dislike = dislike;
     }
 
     public Boolean getApproved() {

@@ -25,14 +25,14 @@ public class JWTService {
 
     public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
-        long FIFTEEN_MINUTES = 900_000;
+        long ONE_HOUR = 3_600_000;
 
         return Jwts.builder()
                 .claims()
                 .add(claims)
                 .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + FIFTEEN_MINUTES))
+                .expiration(new Date(System.currentTimeMillis() + ONE_HOUR))
                 .and()
                 .signWith(getKey())
                 .compact()

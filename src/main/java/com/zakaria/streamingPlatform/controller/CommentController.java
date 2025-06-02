@@ -1,9 +1,12 @@
 package com.zakaria.streamingPlatform.controller;
 
 import com.zakaria.streamingPlatform.dto.CommentDTO;
+import com.zakaria.streamingPlatform.dto.UserCommentLikeDTO;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.service.CommentService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/comments")
@@ -15,9 +18,19 @@ public class CommentController {
         this.commentService = commentService;
     }
 
+    @GetMapping("/get-all-by-content/{id}")
+    public Response<List<CommentDTO>> getAllByContent(@PathVariable Long id) {
+        return this.commentService.getAllByContent(id);
+    }
+
     @PostMapping("/add")
     public Response<CommentDTO> addComment(@RequestBody CommentDTO commentDTO) {
         return commentService.addComment(commentDTO);
+    }
+
+    @PostMapping("/reply")
+    public Response<CommentDTO> replyComment(@RequestBody CommentDTO commentDTO) {
+        return commentService.replyComment(commentDTO);
     }
 
     @PutMapping("modify")
@@ -25,8 +38,8 @@ public class CommentController {
         return commentService.modifyComment(commentDTO);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public Response<CommentDTO> deleteComment(@PathVariable Long id) {
-        return commentService.deleteComment(id);
+    @PutMapping("like")
+    public Response<UserCommentLikeDTO> likeComment(@RequestBody UserCommentLikeDTO userCommentLikeDTO) {
+        return commentService.likeComment(userCommentLikeDTO);
     }
 }

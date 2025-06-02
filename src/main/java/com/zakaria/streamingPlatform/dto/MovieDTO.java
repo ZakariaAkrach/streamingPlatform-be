@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class MovieDTO {
-    private int id;
+    private Long id;
     private int idTheMovieDb;
     private TypeMovie typeMovie;
     private String language;
@@ -21,13 +21,15 @@ public class MovieDTO {
     private List<GenresDTO> genres;
     private List<MovieCastDTO> movieCast;
     private int runtime; //movie hours
+    private Integer likes;
+    private Integer dislike;
 
     public MovieDTO() {
     }
 
-    public MovieDTO(int id, int idTheMovieDb, TypeMovie typeMovie, String language, String title, String description,
+    public MovieDTO(Long id, int idTheMovieDb, TypeMovie typeMovie, String language, String title, String description,
                     String posterPath, String backdropPath, LocalDate releaseDate, float popularity, boolean active,
-                    LocalDate dateCreated, List<GenresDTO> genres, List<MovieCastDTO> movieCast, int runtime) {
+                    LocalDate dateCreated, List<GenresDTO> genres, List<MovieCastDTO> movieCast, int runtime, Integer likes, Integer dislike) {
         this.id = id;
         this.idTheMovieDb = idTheMovieDb;
         this.typeMovie = typeMovie;
@@ -43,13 +45,15 @@ public class MovieDTO {
         this.genres = genres;
         this.movieCast = movieCast;
         this.runtime = runtime;
+        this.likes = likes;
+        this.dislike = dislike;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -163,5 +167,21 @@ public class MovieDTO {
 
     public void setRuntime(int runtime) {
         this.runtime = runtime;
+    }
+
+    public Integer getLikes() {
+        return likes;
+    }
+
+    public void setLikes(Integer likes) {
+        this.likes = likes;
+    }
+
+    public Integer getDislike() {
+        return dislike;
+    }
+
+    public void setDislike(Integer dislike) {
+        this.dislike = dislike;
     }
 }

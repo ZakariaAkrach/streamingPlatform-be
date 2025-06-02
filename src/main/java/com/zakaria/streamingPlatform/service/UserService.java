@@ -1,6 +1,7 @@
 package com.zakaria.streamingPlatform.service;
 
 import com.zakaria.streamingPlatform.dto.UserDTO;
+import com.zakaria.streamingPlatform.dto.UserPublicDTO;
 import com.zakaria.streamingPlatform.entities.Role;
 import com.zakaria.streamingPlatform.entities.UserEntity;
 import com.zakaria.streamingPlatform.jwt.JWTService;
@@ -60,6 +61,13 @@ public class UserService {
             return Utils.createResponse(HttpStatus.BAD_REQUEST.value(),
                     "Email is already in use", List.of("Email is already in use"), null);
         }
+        Optional<UserEntity> existUsername = userRepository.findByUsername(userDTO.getUsername());
+        if (existUsername.isPresent()) {
+            logger.error("Username is already in use {}", userDTO.getEmail());
+            return Utils.createResponse(HttpStatus.BAD_REQUEST.value(),
+                    "Username is already in use", List.of("Username is already in use"), null);
+        }
+
         userDTO = prepareUserForRegistration(userDTO);
 
         UserDTO responseModel = userMapper.convertToModel(saveUser(userDTO));
@@ -116,5 +124,17 @@ public class UserService {
             return "Account deactivated. Please contact administration.";
         }
         return "";
+    }
+
+    public Response<UserPublicDTO> getUserInfo() {
+        Optional<UserEntity> existingUser = userRepository.findById(Utils.getCurrentUserEntity().getId());
+        if (existingUser.isPresent()) {
+            UserPublicDTO userPublicDTO = new UserPublicDTO();
+            userPublicDTO.setUsername(existingUser.get().getUsername());
+            logger.info("Returned name user {}", userPublicDTO.getUsername());
+            return Utils.createResponse(HttpStatus.OK.value(), "Returned current logged username", null, userPublicDTO);
+        }
+        logger.info("Not logged");
+        return Utils.createResponse(HttpStatus.OK.value(), "Not logged", null, null);
     }
 }
