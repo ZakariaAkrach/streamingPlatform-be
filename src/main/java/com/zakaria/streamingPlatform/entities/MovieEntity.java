@@ -22,8 +22,6 @@ public class MovieEntity {
     private LocalDate releaseDate;
     private float popularity;
     private int runtime; //movie hours
-    private Integer likes = 0;
-    private Integer dislike = 0;
 
     @OneToMany(mappedBy = "movie")
     private List<SeasonEntity> seasons;
@@ -47,19 +45,12 @@ public class MovieEntity {
     private LocalDate dateCreated;
 
 
-    @PrePersist
-    public void prePersist() {
-        if (likes == null) likes = 0;
-        if (dislike == null) dislike = 0;
-    }
-
-
     public MovieEntity() {
     }
 
     public MovieEntity(Long id, int idTheMovieDb, TypeMovie typeMovie, String language, String title, String description,
                        String posterPath, String backdropPath, LocalDate releaseDate, float popularity, int runtime,
-                       Integer likes, Integer dislike, List<SeasonEntity> seasons, boolean active, List<GenresEntity> genres,
+                       List<SeasonEntity> seasons, boolean active, List<GenresEntity> genres,
                        List<MovieCastEntity> movieCast, List<CommentEntity> comments, LocalDate dateCreated) {
         this.id = id;
         this.idTheMovieDb = idTheMovieDb;
@@ -72,8 +63,6 @@ public class MovieEntity {
         this.releaseDate = releaseDate;
         this.popularity = popularity;
         this.runtime = runtime;
-        this.likes = likes;
-        this.dislike = dislike;
         this.seasons = seasons;
         this.active = active;
         this.genres = genres;
@@ -168,22 +157,6 @@ public class MovieEntity {
 
     public void setRuntime(int runtime) {
         this.runtime = runtime;
-    }
-
-    public Integer getLikes() {
-        return likes;
-    }
-
-    public void setLikes(Integer likes) {
-        this.likes = likes;
-    }
-
-    public Integer getDislike() {
-        return dislike;
-    }
-
-    public void setDislike(Integer dislike) {
-        this.dislike = dislike;
     }
 
     public List<SeasonEntity> getSeasons() {

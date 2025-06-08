@@ -48,6 +48,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(httpRequests -> httpRequests
                         .requestMatchers(HttpMethod.GET, "/movie/**", "/comments/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/movie/**", "/comments/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/movie/**", "/comments/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/movie/**", "/comments/**").authenticated()
                         .requestMatchers("/auth/**", "/oauth2/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(oauth -> oauth

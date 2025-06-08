@@ -1,6 +1,8 @@
 package com.zakaria.streamingPlatform.utils;
 
 import com.zakaria.streamingPlatform.compositeKeys.UserCommentKey;
+import com.zakaria.streamingPlatform.compositeKeys.UserMovieKey;
+import com.zakaria.streamingPlatform.entities.Role;
 import com.zakaria.streamingPlatform.entities.UserEntity;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponsePagination;
@@ -44,6 +46,16 @@ public final class Utils {
         responseToken.setStatus(httpStatus);
         responseToken.setMessage(message);
         responseToken.setToken(token);
+        return responseToken;
+    }
+
+    public static ResponseToken createResponseToken(int httpStatus, String message, String token, Role role) {
+        ResponseToken responseToken = new ResponseToken();
+
+        responseToken.setStatus(httpStatus);
+        responseToken.setMessage(message);
+        responseToken.setToken(token);
+        responseToken.setRole(role);
         return responseToken;
     }
 
@@ -95,5 +107,16 @@ public final class Utils {
         userCommentKey.setUserId(Utils.getCurrentUserEntity().getId());
 
         return userCommentKey;
+    }
+
+    public static UserMovieKey buildUserMovieKey(Long movieEntity) {
+        if(Utils.getCurrentUserEntity() == null){
+            return null;
+        }
+        UserMovieKey userMovieKey = new UserMovieKey();
+        userMovieKey.setMovieId(movieEntity);
+        userMovieKey.setUserId(Utils.getCurrentUserEntity().getId());
+
+        return userMovieKey;
     }
 }

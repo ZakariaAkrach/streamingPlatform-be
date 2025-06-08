@@ -9,6 +9,7 @@ import com.zakaria.streamingPlatform.mapper.UserMapper;
 import com.zakaria.streamingPlatform.repository.UserRepository;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponseToken;
+import com.zakaria.streamingPlatform.security.user.CustomUserDetails;
 import com.zakaria.streamingPlatform.utils.Utils;
 import com.zakaria.streamingPlatform.validator.UserValidator;
 import org.slf4j.Logger;
@@ -100,10 +101,18 @@ public class UserService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userDTO.getEmail(), userDTO.getPassword()));
 
+            Object principal = authentication.getPrincipal();
+            UserEntity userEntity = null;
+
+            if (principal instanceof CustomUserDetails) {
+                CustomUserDetails userDetails = (CustomUserDetails) principal;
+                userEntity = userDetails.getUser();
+            }
+
             if (authentication.isAuthenticated()) {
                 String token = jwtService.generateToken(userDTO.getEmail());
                 logger.error("Token created successfully {}", token);
-                return Utils.createResponseToken(HttpStatus.OK.value(), "Token created successfully", token);
+                return Utils.createResponseToken(HttpStatus.OK.value(), "Token created successfully", token, userEntity.getRole());
             }
         } catch (AuthenticationException e) {
             logger.error("Invalid credentials for generation token");

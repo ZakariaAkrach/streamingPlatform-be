@@ -1,9 +1,6 @@
 package com.zakaria.streamingPlatform.service;
 
-import com.zakaria.streamingPlatform.dto.CastDTO;
-import com.zakaria.streamingPlatform.dto.GenresDTO;
-import com.zakaria.streamingPlatform.dto.MovieDTO;
-import com.zakaria.streamingPlatform.dto.SeasonDTO;
+import com.zakaria.streamingPlatform.dto.*;
 import com.zakaria.streamingPlatform.entities.*;
 import com.zakaria.streamingPlatform.external.TheMovieDbModel;
 import com.zakaria.streamingPlatform.external.TheMovieDbPaginationModel;
@@ -11,10 +8,7 @@ import com.zakaria.streamingPlatform.external.detailMovieModels.TheMovieDbCastMo
 import com.zakaria.streamingPlatform.external.detailMovieModels.TheMovieDbDetailModel;
 import com.zakaria.streamingPlatform.external.detailMovieModels.TheMovieDbGenresMovieModel;
 import com.zakaria.streamingPlatform.external.detailMovieModels.TheMovieDbSeason;
-import com.zakaria.streamingPlatform.mapper.CastMapper;
-import com.zakaria.streamingPlatform.mapper.GenresMapper;
-import com.zakaria.streamingPlatform.mapper.MovieMapper;
-import com.zakaria.streamingPlatform.mapper.SeasonMapper;
+import com.zakaria.streamingPlatform.mapper.*;
 import com.zakaria.streamingPlatform.repository.*;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponsePagination;
@@ -46,22 +40,33 @@ public class MovieService {
     private final CastRepository castRepository;
     private final SeasonRepository seasonRepository;
     private final MovieCastRepository movieCastRepository;
+    private final UserRepository userRepository;
+    private final UserMovieLikeRepository userMovieLikeRepository;
+    private final UserMovieFavoriteRepository userMovieFavoriteRepository;
     private final GenresMapper genresMapper;
     private final CastMapper castMapper;
     private final SeasonMapper seasonMapper;
+    private final UserMovieLikeMapper userMovieLikeMapper;
+    private final UserMovieFavoriteMapper userMovieFavoriteMapper;
 
     public MovieService(MovieRepository movieRepository, MovieMapper movieMapper, GenresRepository genresRepository,
                         CastRepository castRepository, SeasonRepository seasonRepository, MovieCastRepository movieCastRepository,
-                        GenresMapper genresMapper, CastMapper castMapper, SeasonMapper seasonMapper) {
+                        UserRepository userRepository, UserMovieLikeRepository userMovieLikeRepository, UserMovieFavoriteRepository userMovieFavoriteRepository,
+                        GenresMapper genresMapper, CastMapper castMapper, SeasonMapper seasonMapper, UserMovieLikeMapper userMovieLikeMapper, UserMovieFavoriteMapper userMovieFavoriteMapper) {
         this.movieRepository = movieRepository;
         this.movieMapper = movieMapper;
         this.genresRepository = genresRepository;
         this.castRepository = castRepository;
         this.seasonRepository = seasonRepository;
         this.movieCastRepository = movieCastRepository;
+        this.userRepository = userRepository;
+        this.userMovieLikeRepository = userMovieLikeRepository;
+        this.userMovieFavoriteRepository = userMovieFavoriteRepository;
         this.genresMapper = genresMapper;
         this.castMapper = castMapper;
         this.seasonMapper = seasonMapper;
+        this.userMovieLikeMapper = userMovieLikeMapper;
+        this.userMovieFavoriteMapper = userMovieFavoriteMapper;
     }
 
     private static final Logger logger = LoggerFactory.getLogger(MovieService.class);
@@ -369,5 +374,124 @@ public class MovieService {
         }
         logger.info("trending tv shows no data found");
         return Utils.createResponse(HttpStatus.NO_CONTENT.value(), "trending tv shows no data found", List.of("trending tv shows no data found"), null);
+    }
+
+    public Response<UserMovieLikeDTO> likeMovie(UserMovieLikeDTO userMovieLikeDTO) {
+        Optional<MovieEntity> existingMovie = this.movieRepository.findById(userMovieLikeDTO.getMovieId());
+        Optional<UserEntity> existingUser = this.userRepository.findById(Utils.getCurrentUserEntity().getId());
+
+        if (existingMovie.isPresent()) {
+            try {
+                Optional<UserMovieLikeEntity> existingUserMovieLike = this.userMovieLikeRepository.findById(Utils.buildUserMovieKey(existingMovie.get().getId()));
+                UserMovieLikeEntity userMovieLikeEntity = null;
+                UserMovieLikeEntity savedUserMovieLikeEntity = null;
+
+                if (existingUserMovieLike.isPresent()) {
+                    userMovieLikeEntity = existingUserMovieLike.get();
+                    if (userMovieLikeEntity.getLiked() != null && userMovieLikeEntity.getLiked().equals(userMovieLikeDTO.getLiked())) {
+                        userMovieLikeEntity.setLiked(null);
+                    } else {
+                        userMovieLikeEntity.setLiked(userMovieLikeDTO.getLiked());
+                    }
+                    savedUserMovieLikeEntity = this.userMovieLikeRepository.save(userMovieLikeEntity);
+                } else {
+                    userMovieLikeEntity = new UserMovieLikeEntity();
+                    userMovieLikeEntity.setUserMovieKey(Utils.buildUserMovieKey(existingMovie.get().getId()));
+                    userMovieLikeEntity.setUser(existingUser.get());
+                    userMovieLikeEntity.setMovie(existingMovie.get());
+                    userMovieLikeEntity.setLiked(userMovieLikeDTO.getLiked());
+                    savedUserMovieLikeEntity = this.userMovieLikeRepository.save(userMovieLikeEntity);
+                }
+
+                UserMovieLikeDTO savedUserMovieLikeDTO = this.userMovieLikeMapper.convertToModel(savedUserMovieLikeEntity);
+                logger.info("Add like to the movie ID {} and user ID {}", savedUserMovieLikeDTO.getMovieId(), Utils.getCurrentUserEntity().getId());
+                return Utils.createResponse(HttpStatus.OK.value(), "Successfully added like", null, savedUserMovieLikeDTO);
+
+            } catch (Exception e) {
+                logger.error("Error while adding like to the movie ID {}", userMovieLikeDTO.getMovieId());
+                return Utils.createResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to add like", null, null);
+            }
+        }
+        logger.error("Movie ID {} not found", userMovieLikeDTO.getMovieId());
+        return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Movie to add like not found", null, null);
+    }
+
+    public Response<UserMovieFavoriteDTO> favoriteMovie(UserMovieFavoriteDTO userMovieFavoriteDTO) {
+        Optional<MovieEntity> existMovie = this.movieRepository.findById(userMovieFavoriteDTO.getMovieId());
+        Optional<UserEntity> existUser = this.userRepository.findById(Utils.getCurrentUserEntity().getId());
+
+        if (existMovie.isPresent()) {
+            try {
+                Optional<UserMovieFavoriteEntity> existUserMovieFavoriteEntity = this.userMovieFavoriteRepository.findById(Utils.buildUserMovieKey(userMovieFavoriteDTO.getMovieId()));
+                UserMovieFavoriteEntity userMovieFavoriteEntity = null;
+                UserMovieFavoriteEntity savedUserMovieFavoriteEntity = null;
+
+                if (existUserMovieFavoriteEntity.isPresent()) {
+                    userMovieFavoriteEntity = existUserMovieFavoriteEntity.get();
+                    userMovieFavoriteEntity.setFavorite(userMovieFavoriteDTO.isFavorite());
+                    savedUserMovieFavoriteEntity = this.userMovieFavoriteRepository.save(userMovieFavoriteEntity);
+                } else {
+                    userMovieFavoriteEntity = new UserMovieFavoriteEntity();
+                    userMovieFavoriteEntity.setUserMovieKey(Utils.buildUserMovieKey(userMovieFavoriteDTO.getMovieId()));
+                    userMovieFavoriteEntity.setUser(existUser.get());
+                    userMovieFavoriteEntity.setMovie(existMovie.get());
+                    userMovieFavoriteEntity.setFavorite(userMovieFavoriteDTO.isFavorite());
+                    savedUserMovieFavoriteEntity = this.userMovieFavoriteRepository.save(userMovieFavoriteEntity);
+                }
+                UserMovieFavoriteDTO savedUserMovieFavoriteDTO = this.userMovieFavoriteMapper.convertToModel(savedUserMovieFavoriteEntity);
+                logger.info("Add to favorite the movie ID {} and user ID {}", savedUserMovieFavoriteDTO.getMovieId(), Utils.getCurrentUserEntity().getId());
+                return Utils.createResponse(HttpStatus.OK.value(), "Successfully added favorite", null, savedUserMovieFavoriteDTO);
+            } catch (Exception e) {
+                logger.error("Error while adding to favorite the movie ID {}", userMovieFavoriteDTO.getMovieId());
+                return Utils.createResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to add favorite", null, null);
+            }
+        }
+        logger.error("Movie ID {} not found", userMovieFavoriteDTO.getMovieId());
+        return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Movie to add favorite not found", null, null);
+    }
+
+    public Response<UserMovieFavoriteDTO> isMovieIdFavorite(Long id) {
+        UserMovieFavoriteDTO returnNotFound = new UserMovieFavoriteDTO();
+        returnNotFound.setFavorite(false);
+        if(Utils.buildUserMovieKey(id) == null) {
+            logger.info("Error Get info favorite for movie ID {} does not exist", id);
+            return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Error info movie favorite", null, returnNotFound);
+        }
+
+        Optional<MovieEntity> existMovie = this.movieRepository.findById(id);
+
+        if (existMovie.isPresent()) {
+            Optional<UserMovieFavoriteEntity> existUserMovieFavoriteEntity = this.userMovieFavoriteRepository.findById(Utils.buildUserMovieKey(id));
+
+            if (existUserMovieFavoriteEntity.isPresent()) {
+                UserMovieFavoriteDTO userMovieLikeDTO = userMovieFavoriteMapper.convertToModel(existUserMovieFavoriteEntity.get());
+                logger.info("Get info favorite for movie ID {}", id);
+                return Utils.createResponse(HttpStatus.OK.value(), "Successfully returned info favorite", null, userMovieLikeDTO);
+            }
+        }
+        logger.error("Movie ID {} not found", id);
+        return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Movie id not found", null, null);
+    }
+
+    public Response<UserMovieLikeDTO> isMovieIdLiked(Long id) {
+        UserMovieLikeDTO returnNotFound = new UserMovieLikeDTO();
+        returnNotFound.setLiked(null);
+        if(Utils.buildUserMovieKey(id) == null) {
+            logger.info("Error Get info liked for movie ID {} does not exist", id);
+            return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Error info movie favorite", null, returnNotFound);
+        }
+        Optional<MovieEntity> existingMovie = this.movieRepository.findById(id);
+
+        if(existingMovie.isPresent()) {
+            Optional<UserMovieLikeEntity> existUserMovieLikeEntity = this.userMovieLikeRepository.findById(Utils.buildUserMovieKey(id));
+
+            if (existUserMovieLikeEntity.isPresent()) {
+                UserMovieLikeDTO userMovieLikeDTO = userMovieLikeMapper.convertToModel(existUserMovieLikeEntity.get());
+                logger.info("Get info like for movie ID {}", id);
+                return Utils.createResponse(HttpStatus.OK.value(), "Successfully returned info like movie", null, userMovieLikeDTO);
+            }
+        }
+        logger.error("Movie ID {} not found", id);
+        return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Movie id not found", null, null);
     }
 }
