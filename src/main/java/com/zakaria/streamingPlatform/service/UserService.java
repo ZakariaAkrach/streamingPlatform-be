@@ -1,14 +1,19 @@
-package com.zakaria.streamingPlatform.user;
+package com.zakaria.streamingPlatform.service;
 
+import com.zakaria.streamingPlatform.dto.UserDTO;
+import com.zakaria.streamingPlatform.dto.UserPublicDTO;
 import com.zakaria.streamingPlatform.entities.Role;
 import com.zakaria.streamingPlatform.entities.UserEntity;
 import com.zakaria.streamingPlatform.jwt.JWTService;
 import com.zakaria.streamingPlatform.mapper.UserMapper;
-import com.zakaria.streamingPlatform.dto.UserDTO;
+import com.zakaria.streamingPlatform.repository.UserRepository;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponseToken;
+import com.zakaria.streamingPlatform.security.user.CustomUserDetails;
 import com.zakaria.streamingPlatform.utils.Utils;
 import com.zakaria.streamingPlatform.validator.UserValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,9 +43,11 @@ public class UserService {
         this.authenticationManager = authenticationManager;
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
 
-    public Response<UserDTO> register(UserDTO userDTO) {
+    public Response<String> register(UserDTO userDTO) {
         UserValidator userValidator = new UserValidator();
 
         List<String> errors = userValidator.validate(userDTO);
@@ -51,15 +58,24 @@ public class UserService {
         Optional<UserEntity> existEmail = userRepository.findByEmail(userDTO.getEmail());
 
         if (existEmail.isPresent()) {
+            logger.error("Email is already in use {}", userDTO.getEmail());
             return Utils.createResponse(HttpStatus.BAD_REQUEST.value(),
                     "Email is already in use", List.of("Email is already in use"), null);
         }
+        Optional<UserEntity> existUsername = userRepository.findByUsername(userDTO.getUsername());
+        if (existUsername.isPresent()) {
+            logger.error("Username is already in use {}", userDTO.getEmail());
+            return Utils.createResponse(HttpStatus.BAD_REQUEST.value(),
+                    "Username is already in use", List.of("Username is already in use"), null);
+        }
+
         userDTO = prepareUserForRegistration(userDTO);
 
         UserDTO responseModel = userMapper.convertToModel(saveUser(userDTO));
         responseModel.setPassword(null);
 
-        return Utils.createResponse(HttpStatus.CREATED.value(), "User created successfully", null, responseModel);
+        logger.error("User created successfully {}", userDTO.getEmail());
+        return Utils.createResponse(HttpStatus.CREATED.value(), "User created successfully", null, "User created successfully");
     }
 
     public UserDTO prepareUserForRegistration(UserDTO userDTO) {
@@ -85,11 +101,21 @@ public class UserService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userDTO.getEmail(), userDTO.getPassword()));
 
+            Object principal = authentication.getPrincipal();
+            UserEntity userEntity = null;
+
+            if (principal instanceof CustomUserDetails) {
+                CustomUserDetails userDetails = (CustomUserDetails) principal;
+                userEntity = userDetails.getUser();
+            }
+
             if (authentication.isAuthenticated()) {
                 String token = jwtService.generateToken(userDTO.getEmail());
-                return Utils.createResponseToken(HttpStatus.OK.value(), "Token created successfully", token);
+                logger.error("Token created successfully {}", token);
+                return Utils.createResponseToken(HttpStatus.OK.value(), "Token created successfully", token, userEntity.getRole());
             }
         } catch (AuthenticationException e) {
+            logger.error("Invalid credentials for generation token");
             return Utils.createResponseToken(HttpStatus.UNAUTHORIZED.value(), "Invalid credentials.", null);
         }
         return Utils.createResponseToken(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error during login.", null);
@@ -99,11 +125,25 @@ public class UserService {
         Optional<UserEntity> findByEmail = userRepository.findByEmail(email);
 
         if (findByEmail.isEmpty()) {
+            logger.error("Email not found {}", email);
             return "Email not found.";
         }
         if (!findByEmail.get().isActive()) {
+            logger.error("Account deactivated. Please contact administration {}", email);
             return "Account deactivated. Please contact administration.";
         }
         return "";
+    }
+
+    public Response<UserPublicDTO> getUserInfo() {
+        Optional<UserEntity> existingUser = userRepository.findById(Utils.getCurrentUserEntity().getId());
+        if (existingUser.isPresent()) {
+            UserPublicDTO userPublicDTO = new UserPublicDTO();
+            userPublicDTO.setUsername(existingUser.get().getUsername());
+            logger.info("Returned name user {}", userPublicDTO.getUsername());
+            return Utils.createResponse(HttpStatus.OK.value(), "Returned current logged username", null, userPublicDTO);
+        }
+        logger.info("Not logged");
+        return Utils.createResponse(HttpStatus.OK.value(), "Not logged", null, null);
     }
 }

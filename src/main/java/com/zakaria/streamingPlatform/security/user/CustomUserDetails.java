@@ -1,4 +1,4 @@
-package com.zakaria.streamingPlatform.user;
+package com.zakaria.streamingPlatform.security.user;
 
 import com.zakaria.streamingPlatform.entities.UserEntity;
 import org.springframework.security.core.GrantedAuthority;

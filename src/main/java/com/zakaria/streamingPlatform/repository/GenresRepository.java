@@ -1,4 +1,4 @@
-package com.zakaria.streamingPlatform.movie;
+package com.zakaria.streamingPlatform.repository;
 
 import com.zakaria.streamingPlatform.entities.GenresEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

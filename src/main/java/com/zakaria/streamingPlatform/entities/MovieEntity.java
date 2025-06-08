@@ -36,21 +36,22 @@ public class MovieEntity {
     )
     private List<GenresEntity> genres;
 
-    @ManyToMany
-    @JoinTable(
-            name = "movie_cast",
-            joinColumns = @JoinColumn(name = "movie_id"),
-            inverseJoinColumns = @JoinColumn(name = "cast_id")
-    )
-    private List<CastEntity> cast;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    private List<MovieCastEntity> movieCast;
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    private List<CommentEntity> comments;
 
     private LocalDate dateCreated;
+
 
     public MovieEntity() {
     }
 
-    public MovieEntity(Long id, int idTheMovieDb, TypeMovie typeMovie, String language, String title,
-                       String description, String posterPath, String backdropPath, LocalDate releaseDate, float popularity, int runtime, List<SeasonEntity> seasons, boolean active, List<GenresEntity> genres, List<CastEntity> cast, LocalDate dateCreated) {
+    public MovieEntity(Long id, int idTheMovieDb, TypeMovie typeMovie, String language, String title, String description,
+                       String posterPath, String backdropPath, LocalDate releaseDate, float popularity, int runtime,
+                       List<SeasonEntity> seasons, boolean active, List<GenresEntity> genres,
+                       List<MovieCastEntity> movieCast, List<CommentEntity> comments, LocalDate dateCreated) {
         this.id = id;
         this.idTheMovieDb = idTheMovieDb;
         this.typeMovie = typeMovie;
@@ -65,7 +66,8 @@ public class MovieEntity {
         this.seasons = seasons;
         this.active = active;
         this.genres = genres;
-        this.cast = cast;
+        this.movieCast = movieCast;
+        this.comments = comments;
         this.dateCreated = dateCreated;
     }
 
@@ -181,12 +183,20 @@ public class MovieEntity {
         this.genres = genres;
     }
 
-    public List<CastEntity> getCast() {
-        return cast;
+    public List<MovieCastEntity> getMovieCast() {
+        return movieCast;
     }
 
-    public void setCast(List<CastEntity> cast) {
-        this.cast = cast;
+    public void setMovieCast(List<MovieCastEntity> movieCast) {
+        this.movieCast = movieCast;
+    }
+
+    public List<CommentEntity> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentEntity> comments) {
+        this.comments = comments;
     }
 
     public LocalDate getDateCreated() {
