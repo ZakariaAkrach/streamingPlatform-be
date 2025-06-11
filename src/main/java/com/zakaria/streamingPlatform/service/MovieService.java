@@ -326,8 +326,7 @@ public class MovieService {
 
     @Cacheable("allMovie")
     public ResponsePagination<MovieDTO> getAllMovie(Pageable pageable) {
-        ResponsePagination<MovieDTO> response = new ResponsePagination<>();
-        List<MovieDTO> movieDTO = new ArrayList<>();
+        List<MovieDTO> movieDTO;
 
         Page<MovieEntity> movieEntityPage = movieRepository.findAllByTypeMovie(TypeMovie.MOVIE, pageable);
 
