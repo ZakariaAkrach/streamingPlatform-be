@@ -1,5 +1,6 @@
 package com.zakaria.streamingPlatform.repository;
 
+import com.zakaria.streamingPlatform.dto.MovieDTO;
 import com.zakaria.streamingPlatform.entities.MovieEntity;
 import com.zakaria.streamingPlatform.entities.TypeMovie;
 import org.springframework.data.domain.Page;
@@ -23,4 +24,9 @@ public interface MovieRepository extends JpaRepository<MovieEntity, Long> {
 
     @Query("SELECT m FROM MovieEntity m WHERE m.typeMovie = :typeMovie ORDER BY m.popularity DESC ")
     List<MovieEntity> trendingByTypeMovie(@Param("typeMovie") TypeMovie typeMovie, Pageable pageable);
+
+
+    //Content-Manager
+    @Query("SELECT new com.zakaria.streamingPlatform.dto.MovieDTO(m.id, m.title, m.releaseDate, m.active, m.language, m.posterPath) FROM MovieEntity m WHERE m.typeMovie = :typeMovie")
+    Page<MovieDTO> findMoviesByTypeMovie(@Param("typeMovie") TypeMovie typeMovie, Pageable pageable);
 }
