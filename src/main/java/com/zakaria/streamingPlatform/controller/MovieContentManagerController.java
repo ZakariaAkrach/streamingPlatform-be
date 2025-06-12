@@ -28,7 +28,7 @@ public class MovieContentManagerController {
     public ResponsePagination<MovieDTO> getAllMovie(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "title") String sortBy,
             @RequestParam(defaultValue = "true") boolean ascending,
             @RequestParam(defaultValue = "MOVIE") TypeMovie typeMovie) {
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
