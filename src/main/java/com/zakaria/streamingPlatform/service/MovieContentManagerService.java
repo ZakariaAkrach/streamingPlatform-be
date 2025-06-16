@@ -1,6 +1,7 @@
 package com.zakaria.streamingPlatform.service;
 
 import com.zakaria.streamingPlatform.dto.MovieDTO;
+import com.zakaria.streamingPlatform.entities.MovieEntity;
 import com.zakaria.streamingPlatform.entities.TypeMovie;
 import com.zakaria.streamingPlatform.mapper.MovieMapper;
 import com.zakaria.streamingPlatform.repository.MovieRepository;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class MovieContentManagerService {
@@ -28,13 +31,23 @@ public class MovieContentManagerService {
     private static final Logger logger = LoggerFactory.getLogger(MovieContentManagerService.class);
 
     @Cacheable("allMovieContentManager")
-    public ResponsePagination<MovieDTO> getAllMovie(Pageable pageable, TypeMovie typeMovie) {
+    public ResponsePagination<MovieDTO> getAllMovie(Pageable pageable, TypeMovie typeMovie, String title) {
+        Page<MovieEntity> movieEntityPage = null;
 
-        Page<MovieDTO> movieEntityPage = movieRepository.findMoviesByTypeMovie(typeMovie, pageable);
+        if (title.isEmpty() || title.isBlank()) {
+            movieEntityPage = movieRepository.findByTypeMovie(typeMovie, pageable);
+        } else {
+            movieEntityPage = movieRepository.findByTypeMovieAndTitleContainingIgnoreCase(typeMovie, title, pageable);
+        }
 
         if (!movieEntityPage.isEmpty()) {
             logger.info("Get all movies successfully");
-            return Utils.createResponsePagination(HttpStatus.OK.value(), "Get all movies successfully", movieEntityPage.getContent(), pageable.getPageNumber(),
+            List<MovieDTO> movieDTO = movieMapper.convertToModel(movieEntityPage.getContent());
+            movieDTO.forEach(singleMovie -> {
+                singleMovie.setMovieCast(null);
+                singleMovie.setGenres(null);
+            });
+            return Utils.createResponsePagination(HttpStatus.OK.value(), "Get all movies successfully", movieDTO, pageable.getPageNumber(),
                     pageable.getPageSize(), movieEntityPage.getTotalPages(), movieEntityPage.getTotalElements(), movieEntityPage.isLast(), null);
         }
         logger.info("No movie available");

@@ -30,9 +30,10 @@ public class MovieContentManagerController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "title") String sortBy,
             @RequestParam(defaultValue = "true") boolean ascending,
-            @RequestParam(defaultValue = "MOVIE") TypeMovie typeMovie) {
+            @RequestParam(defaultValue = "MOVIE") TypeMovie typeMovie,
+            @RequestParam(defaultValue = "") String title) {
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        return this.movieContentManagerService.getAllMovie(pageable, typeMovie);
+        return this.movieContentManagerService.getAllMovie(pageable, typeMovie, title);
     }
 }
