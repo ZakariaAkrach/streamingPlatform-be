@@ -4,7 +4,7 @@ import com.zakaria.streamingPlatform.dto.MovieDTO;
 import com.zakaria.streamingPlatform.entities.MovieEntity;
 import com.zakaria.streamingPlatform.entities.TypeMovie;
 import com.zakaria.streamingPlatform.mapper.MovieMapper;
-import com.zakaria.streamingPlatform.repository.MovieRepository;
+import com.zakaria.streamingPlatform.repository.*;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponsePagination;
 import com.zakaria.streamingPlatform.utils.Utils;
@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,10 +25,21 @@ import java.util.Optional;
 public class MovieContentManagerService {
 
     private final MovieRepository movieRepository;
+    private final UserMovieLikeRepository userMovieLikeRepository;
+    private final UserMovieFavoriteRepository userMovieFavoriteRepository;
+    private final CommentRepository commentRepository;
+    private final UserCommentLikeRepository userCommentLikeRepository;
     private final MovieMapper movieMapper;
 
-    public MovieContentManagerService(MovieRepository movieRepository, MovieMapper movieMapper) {
+
+    public MovieContentManagerService(MovieRepository movieRepository, UserMovieLikeRepository userMovieLikeRepository,
+                                      UserMovieFavoriteRepository userMovieFavoriteRepository, CommentRepository commentRepository,
+                                      UserCommentLikeRepository userCommentLikeRepository, MovieMapper movieMapper) {
         this.movieRepository = movieRepository;
+        this.userMovieLikeRepository = userMovieLikeRepository;
+        this.userMovieFavoriteRepository = userMovieFavoriteRepository;
+        this.commentRepository = commentRepository;
+        this.userCommentLikeRepository = userCommentLikeRepository;
         this.movieMapper = movieMapper;
     }
 
@@ -87,15 +99,26 @@ public class MovieContentManagerService {
         }
     }
 
-    @CacheEvict(value = "allMovieContentManager", allEntries = true)
+    @CacheEvict(value = {"allMovieContentManager", "allMovie"}, allEntries = true)
+    @Transactional
     public Response<String> deleteContent(Long id) {
         Optional<MovieEntity> existMovie = this.movieRepository.findById(id);
 
         if (existMovie.isPresent()) {
-            this.movieRepository.deleteById(id);
+            try {
+                //It is made on purpose the content manager role can delete movie even if they have like comment...
+                this.userMovieLikeRepository.deleteAllByMovieId(id);
+                this.userMovieFavoriteRepository.deleteAllByMovieId(id);
+                this.userCommentLikeRepository.deleteAllByMovieId(id);
+                this.commentRepository.deleteAllByMovieId(id);
 
-            logger.info("Successfully deleted movie with ID: {} ", id);
-            return Utils.createResponse(HttpStatus.OK.value(), "Movie deleted successfully.");
+                this.movieRepository.deleteById(id);
+                logger.info("Successfully deleted movie with ID: {} ", id);
+                return Utils.createResponse(HttpStatus.OK.value(), "Movie deleted successfully.");
+            } catch (Exception e) {
+                logger.error("Error while deleted movie with ID: {} error {} ", id, e.getMessage());
+                return Utils.createResponse(HttpStatus.OK.value(), "Error deleting movie: " + e.getMessage());
+            }
         } else {
             logger.info("Movie id {} not found ", id);
             return Utils.createResponse(HttpStatus.NO_CONTENT.value(), "Movie not found");
