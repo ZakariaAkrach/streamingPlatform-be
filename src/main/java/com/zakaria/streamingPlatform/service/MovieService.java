@@ -81,7 +81,7 @@ public class MovieService {
             "zh", // Chinese (China)
             "da", // Danish (Denmark)
             "ru", // Russian (Russia)
-            "ar", // Arabic (Morocco)
+            "ar", // Arabic
             "th"  // Thai (Thailand)
     );
 
@@ -92,12 +92,47 @@ public class MovieService {
         List<TheMovieDbPaginationModel> result = getPaginatedMoviesFromApi(typeMovieApi);
         List<MovieDTO> listMovieDTO = new ArrayList<>();
 
+        int countMovieAdded = mapAndPersistMoviesFromApiResponse(typeMovieApi, result, listMovieDTO);
+
+        if (countMovieAdded > 0) {
+            addMovieDetails(typeMovieApi);
+        }
+        logger.info("Total {} added {}", typeMovieApi, countMovieAdded);
+    }
+
+    public int addSingleMovieFromDbApi(String typeMovie, int id) {
+        TheMovieDbModel result = getSingleMovieFromApi(typeMovie, id);
+        List<MovieDTO> listMovieDTO = new ArrayList<>();
+
+        int countMovieAdded = mapAndPersistMoviesFromApiResponseSingleMovie(typeMovie, result, listMovieDTO);
+
+        if (countMovieAdded > 0) {
+            addMovieDetail(typeMovie, result.getId());
+        }
+        logger.info("Total {} added {}", typeMovie, countMovieAdded);
+        return countMovieAdded;
+    }
+
+    private int mapAndPersistMoviesFromApiResponseSingleMovie(String typeMovieApi, TheMovieDbModel theMovieDbModel, List<MovieDTO> listMovieDTO) {
+        setMovieModel(theMovieDbModel, listMovieDTO, typeMovieApi);
+
+        int countMovieAdded = 0;
+        countMovieAdded = getCountMovieAdded(listMovieDTO, countMovieAdded);
+        return countMovieAdded;
+    }
+
+    private int mapAndPersistMoviesFromApiResponse(String typeMovieApi, List<TheMovieDbPaginationModel> result, List<MovieDTO> listMovieDTO) {
         for (TheMovieDbPaginationModel theMovieDbPaginationModel : result) {
             for (TheMovieDbModel theMovieDbModel : theMovieDbPaginationModel.getResults()) {
                 setMovieModel(theMovieDbModel, listMovieDTO, typeMovieApi);
             }
         }
         int countMovieAdded = 0;
+        countMovieAdded = getCountMovieAdded(listMovieDTO, countMovieAdded);
+        return countMovieAdded;
+    }
+
+    private int getCountMovieAdded(List<MovieDTO> listMovieDTO, int countMovieAdded) {
         for (MovieDTO singleMovieDTO : listMovieDTO) {
             if (isMovieModelValid(singleMovieDTO)) {
                 Optional<MovieEntity> existingMovie = movieRepository.findByIdTheMovieDb(singleMovieDTO.getIdTheMovieDb());
@@ -110,13 +145,10 @@ public class MovieService {
                 }
             }
         }
-        if (countMovieAdded > 0) {
-            addMovieDetail(typeMovieApi);
-        }
-        logger.info("Total {} added {}", typeMovieApi, countMovieAdded);
+        return countMovieAdded;
     }
 
-    public void addMovieDetail(String typeMovieApi) {
+    public void addMovieDetails(String typeMovieApi) {
 
         List<MovieEntity> allMovie;
         if (typeMovieApi.equals("movie")) {
@@ -125,57 +157,83 @@ public class MovieService {
             allMovie = movieRepository.findAllByTypeMovie(TypeMovie.TV_SHOW);
         }
 
+        processMovieDetails(typeMovieApi, allMovie);
+    }
+
+    public void addMovieDetail(String typeMovieApi, int idTheMovieDb) {
+        Optional<MovieEntity> movie = movieRepository.findByIdTheMovieDb(idTheMovieDb);
+        if (movie.isPresent()) {
+            processSingleMovieDetails(typeMovieApi, movie.get());
+        } else {
+            logger.info("Movie to add not found");
+        }
+    }
+
+    private void processMovieDetails(String typeMovieApi, List<MovieEntity> allMovie) {
         for (MovieEntity movieEntity : allMovie) {
             logger.info("Processing {} title {}", typeMovieApi, movieEntity.getTitle());
-            List<TheMovieDbDetailModel> listTheMovieDbDetailModel = getDetailMovies(typeMovieApi, movieEntity.getIdTheMovieDb());
-            List<GenresEntity> genresEntitiesList = new ArrayList<>();
-            List<SeasonEntity> seasonEntityList = new ArrayList<>();
-            for (TheMovieDbDetailModel theMovieDbDetailModel : listTheMovieDbDetailModel) {
-                if (theMovieDbDetailModel.getGenres() != null && theMovieDbDetailModel.getCredits() != null) {
-                    for (TheMovieDbGenresMovieModel theMovieDbGenresMovieModel : theMovieDbDetailModel.getGenres()) {
-                        Optional<GenresEntity> genresEntity = genresRepository.findByName(theMovieDbGenresMovieModel.getName());
-                        if (genresEntity.isEmpty()) {
-                            GenresDTO genresDTO = setGenreDTOBeforeSaving(theMovieDbGenresMovieModel);
-                            genresEntitiesList.add(genresRepository.save(genresMapper.convertToEntity(genresDTO)));
-                        } else {
-                            genresEntitiesList.add(genresEntity.get());
-                        }
-                    }
-                    for (TheMovieDbCastModel theMovieDbCreditsModel : theMovieDbDetailModel.getCredits().getCast()) {
-                        Optional<CastEntity> castEntityOptional = castRepository.findByName(theMovieDbCreditsModel.getName());
-                        MovieCastEntity movieCastEntity = new MovieCastEntity();
-                        CastEntity castEntity;
+            fetchAndStoreMovieDetails(typeMovieApi, movieEntity);
+        }
+    }
 
-                        movieCastEntity.setMovie(movieEntity);
-                        movieCastEntity.setCharacterName(theMovieDbCreditsModel.getCharacter());
+    private void processSingleMovieDetails(String typeMovieApi, MovieEntity movie) {
+        logger.info("Processing {} title {}", typeMovieApi, movie.getTitle());
+        fetchAndStoreMovieDetails(typeMovieApi, movie);
+    }
 
-                        if (castEntityOptional.isEmpty()) {
-                            CastDTO castDTO = setCastDTOBeforeSaving(theMovieDbCreditsModel);
-                            castEntity = castRepository.save(castMapper.convertToEntity(castDTO));
-                        } else {
-                            castEntity = castEntityOptional.get();
-                        }
-                        movieCastEntity.setCast(castEntity);
-                        movieCastRepository.save(movieCastEntity);
+    private void fetchAndStoreMovieDetails(String typeMovieApi, MovieEntity movieEntity) {
+        List<TheMovieDbDetailModel> listTheMovieDbDetailModel = getDetailMovies(typeMovieApi, movieEntity.getIdTheMovieDb());
+        addDetailMovieToDB(typeMovieApi, movieEntity, listTheMovieDbDetailModel);
+    }
+
+    private void addDetailMovieToDB(String typeMovieApi, MovieEntity movieEntity, List<TheMovieDbDetailModel> listTheMovieDbDetailModel) {
+        List<GenresEntity> genresEntitiesList = new ArrayList<>();
+        List<SeasonEntity> seasonEntityList = new ArrayList<>();
+        for (TheMovieDbDetailModel theMovieDbDetailModel : listTheMovieDbDetailModel) {
+            if (theMovieDbDetailModel.getGenres() != null && theMovieDbDetailModel.getCredits() != null) {
+                for (TheMovieDbGenresMovieModel theMovieDbGenresMovieModel : theMovieDbDetailModel.getGenres()) {
+                    Optional<GenresEntity> genresEntity = genresRepository.findByName(theMovieDbGenresMovieModel.getName());
+                    if (genresEntity.isEmpty()) {
+                        GenresDTO genresDTO = setGenreDTOBeforeSaving(theMovieDbGenresMovieModel);
+                        genresEntitiesList.add(genresRepository.save(genresMapper.convertToEntity(genresDTO)));
+                    } else {
+                        genresEntitiesList.add(genresEntity.get());
                     }
-                    if (typeMovieApi.equals("tv")) {
-                        for (TheMovieDbSeason theMovieDbSeason : theMovieDbDetailModel.getSeasons()) {
-                            Optional<SeasonEntity> existingSeason = seasonRepository.findByIdTheMovieDb(theMovieDbSeason.getId());
-                            if (existingSeason.isEmpty()) {
-                                SeasonDTO seasonDTO = setSeasonDTOBeforeSaving(theMovieDbSeason);
-                                SeasonEntity seasonEntity = seasonMapper.convertToEntity(seasonDTO);
-                                seasonEntity.setMovie(movieEntity);
-                                seasonEntityList.add(seasonRepository.save(seasonEntity));
-                            }
+                }
+                for (TheMovieDbCastModel theMovieDbCreditsModel : theMovieDbDetailModel.getCredits().getCast()) {
+                    Optional<CastEntity> castEntityOptional = castRepository.findByName(theMovieDbCreditsModel.getName());
+                    MovieCastEntity movieCastEntity = new MovieCastEntity();
+                    CastEntity castEntity;
+
+                    movieCastEntity.setMovie(movieEntity);
+                    movieCastEntity.setCharacterName(theMovieDbCreditsModel.getCharacter());
+
+                    if (castEntityOptional.isEmpty()) {
+                        CastDTO castDTO = setCastDTOBeforeSaving(theMovieDbCreditsModel);
+                        castEntity = castRepository.save(castMapper.convertToEntity(castDTO));
+                    } else {
+                        castEntity = castEntityOptional.get();
+                    }
+                    movieCastEntity.setCast(castEntity);
+                    movieCastRepository.save(movieCastEntity);
+                }
+                if (typeMovieApi.equals("tv")) {
+                    for (TheMovieDbSeason theMovieDbSeason : theMovieDbDetailModel.getSeasons()) {
+                        Optional<SeasonEntity> existingSeason = seasonRepository.findByIdTheMovieDb(theMovieDbSeason.getId());
+                        if (existingSeason.isEmpty()) {
+                            SeasonDTO seasonDTO = setSeasonDTOBeforeSaving(theMovieDbSeason);
+                            SeasonEntity seasonEntity = seasonMapper.convertToEntity(seasonDTO);
+                            seasonEntity.setMovie(movieEntity);
+                            seasonEntityList.add(seasonRepository.save(seasonEntity));
                         }
                     }
                 }
             }
-            movieEntity.setGenres(genresEntitiesList);
-            movieEntity.setSeasons(seasonEntityList);
-            movieEntity.setRuntime(listTheMovieDbDetailModel.get(0).getRuntime()); //it is always the index 0
-            movieRepository.save(movieEntity);
         }
+        movieEntity.setGenres(genresEntitiesList);
+        movieEntity.setSeasons(seasonEntityList);
+        movieEntity.setRuntime(listTheMovieDbDetailModel.get(0).getRuntime()); //it is always the index 0
+        movieRepository.save(movieEntity);
     }
 
     private boolean isMovieModelValid(MovieDTO singleMovieDTO) {
@@ -217,6 +275,10 @@ public class MovieService {
         return "https://api.themoviedb.org/3/" + typeMovieApi + "/" + idTheMovieDb + "?api_key=" + movieApiKey + "&append_to_response=credits";
     }
 
+    private String getBaseUrlForSingleMovie(String typeMovieApi, int id) {
+        return "https://api.themoviedb.org/3/" + typeMovieApi + "/" + id + "?api_key=" + movieApiKey;
+    }
+
     public HttpHeaders setHeaderMoviesFromDbApi() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -255,6 +317,28 @@ public class MovieService {
                     result.add(response.getBody());
                 }
             }
+        }
+        return result;
+    }
+
+    public TheMovieDbModel getSingleMovieFromApi(String typeMovie, int id) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<Object> request = new HttpEntity<>(setHeaderMoviesFromDbApi());
+        TheMovieDbModel result = null;
+
+        String url = getBaseUrlForSingleMovie(typeMovie, id);
+
+        ResponseEntity<TheMovieDbModel> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                new ParameterizedTypeReference<>() {
+                });
+        if (response.getBody() != null &&
+                (response.getBody().getBackdrop_path() != null && !response.getBody().getBackdrop_path().isEmpty()) &&
+                (response.getBody().getPoster_path() != null && !response.getBody().getPoster_path().isEmpty()) &&
+                (response.getBody().getOverview() != null && !response.getBody().getOverview().isEmpty())) {
+            result = response.getBody();
         }
         return result;
     }
@@ -407,7 +491,7 @@ public class MovieService {
                 return Utils.createResponse(HttpStatus.OK.value(), "Successfully added like", null, savedUserMovieLikeDTO);
 
             } catch (Exception e) {
-                logger.error("Error while adding like to the movie ID {}", userMovieLikeDTO.getMovieId());
+                logger.error("Error while adding like to the movie ID {}", userMovieLikeDTO.getMovieId(), e);
                 return Utils.createResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to add like", null, null);
             }
         }
@@ -452,7 +536,7 @@ public class MovieService {
     public Response<UserMovieFavoriteDTO> isMovieIdFavorite(Long id) {
         UserMovieFavoriteDTO returnNotFound = new UserMovieFavoriteDTO();
         returnNotFound.setFavorite(false);
-        if(Utils.buildUserMovieKey(id) == null) {
+        if (Utils.buildUserMovieKey(id) == null) {
             logger.info("Error Get info favorite for movie ID {} does not exist", id);
             return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Error info movie favorite", null, returnNotFound);
         }
@@ -475,13 +559,13 @@ public class MovieService {
     public Response<UserMovieLikeDTO> isMovieIdLiked(Long id) {
         UserMovieLikeDTO returnNotFound = new UserMovieLikeDTO();
         returnNotFound.setLiked(null);
-        if(Utils.buildUserMovieKey(id) == null) {
+        if (Utils.buildUserMovieKey(id) == null) {
             logger.info("Error Get info liked for movie ID {} does not exist", id);
             return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Error info movie favorite", null, returnNotFound);
         }
         Optional<MovieEntity> existingMovie = this.movieRepository.findById(id);
 
-        if(existingMovie.isPresent()) {
+        if (existingMovie.isPresent()) {
             Optional<UserMovieLikeEntity> existUserMovieLikeEntity = this.userMovieLikeRepository.findById(Utils.buildUserMovieKey(id));
 
             if (existUserMovieLikeEntity.isPresent()) {

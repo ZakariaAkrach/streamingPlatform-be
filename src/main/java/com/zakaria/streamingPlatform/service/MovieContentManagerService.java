@@ -3,6 +3,8 @@ package com.zakaria.streamingPlatform.service;
 import com.zakaria.streamingPlatform.dto.MovieDTO;
 import com.zakaria.streamingPlatform.entities.MovieEntity;
 import com.zakaria.streamingPlatform.entities.TypeMovie;
+import com.zakaria.streamingPlatform.external.TheMovieDbModel;
+import com.zakaria.streamingPlatform.external.TheMovieDbPaginationModel;
 import com.zakaria.streamingPlatform.mapper.MovieMapper;
 import com.zakaria.streamingPlatform.repository.*;
 import com.zakaria.streamingPlatform.response.Response;
@@ -10,20 +12,26 @@ import com.zakaria.streamingPlatform.response.ResponsePagination;
 import com.zakaria.streamingPlatform.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class MovieContentManagerService {
 
+    private final MovieService movieService;
     private final MovieRepository movieRepository;
     private final UserMovieLikeRepository userMovieLikeRepository;
     private final UserMovieFavoriteRepository userMovieFavoriteRepository;
@@ -32,9 +40,10 @@ public class MovieContentManagerService {
     private final MovieMapper movieMapper;
 
 
-    public MovieContentManagerService(MovieRepository movieRepository, UserMovieLikeRepository userMovieLikeRepository,
+    public MovieContentManagerService(MovieService movieService, MovieRepository movieRepository, UserMovieLikeRepository userMovieLikeRepository,
                                       UserMovieFavoriteRepository userMovieFavoriteRepository, CommentRepository commentRepository,
                                       UserCommentLikeRepository userCommentLikeRepository, MovieMapper movieMapper) {
+        this.movieService = movieService;
         this.movieRepository = movieRepository;
         this.userMovieLikeRepository = userMovieLikeRepository;
         this.userMovieFavoriteRepository = userMovieFavoriteRepository;
@@ -42,6 +51,9 @@ public class MovieContentManagerService {
         this.userCommentLikeRepository = userCommentLikeRepository;
         this.movieMapper = movieMapper;
     }
+
+    @Value("${movies-api-key}")
+    private String movieApiKey;
 
     private static final Logger logger = LoggerFactory.getLogger(MovieContentManagerService.class);
 
@@ -123,5 +135,87 @@ public class MovieContentManagerService {
             logger.info("Movie id {} not found ", id);
             return Utils.createResponse(HttpStatus.NO_CONTENT.value(), "Movie not found");
         }
+    }
+
+    private String getBaseUrl(String typeMovieApi) {
+        return "https://api.themoviedb.org/3/discover/" + typeMovieApi + "?api_key=" + movieApiKey;
+    }
+
+    public HttpHeaders setHeaderMoviesFromDbApi() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        return headers;
+    }
+
+    public int getTotalPagesFromTheMovieDb(String typeMovieApi, String language) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<Object> request = new HttpEntity<>(setHeaderMoviesFromDbApi());
+
+        String url = getBaseUrl(typeMovieApi) + "&with_original_language=" + language;
+
+        ResponseEntity<TheMovieDbPaginationModel> responseForTotalPages = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                new ParameterizedTypeReference<>() {
+                });
+        if (responseForTotalPages.getBody() != null) {
+            logger.info("Total pages found {}", responseForTotalPages.getBody().getTotal_pages());
+            return responseForTotalPages.getBody().getTotal_pages();
+        }
+
+        return 0;
+    }
+
+    public List<TheMovieDbModel> getRandomMoviesFromTheMovieDb(String typeMovieApi, String language) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<Object> request = new HttpEntity<>(setHeaderMoviesFromDbApi());
+        List<TheMovieDbModel> result = new ArrayList<>();
+
+        // Limit to 500 pages because The Movie DB API does not allow pages > 500
+        int totalPages = Math.min(getTotalPagesFromTheMovieDb(typeMovieApi, language), 500);
+        logger.info("Total pages available: {}, limited to max 500", totalPages);
+
+        int randomPage = (int) (Math.random() * totalPages) + 1;
+        logger.info("Selected random page: {}", randomPage);
+
+        String paginatedUrl = getBaseUrl(typeMovieApi) + "&page=" + randomPage + "&with_original_language=" + language;
+        logger.debug("Requesting URL: {}", paginatedUrl);
+
+        ResponseEntity<TheMovieDbPaginationModel> response = restTemplate.exchange(
+                paginatedUrl,
+                HttpMethod.GET,
+                request,
+                new ParameterizedTypeReference<>() {
+                });
+        if (response.getBody() != null && response.getBody().getResults() != null) {
+            logger.info("Number of movies fetched from API: {}", response.getBody().getResults().size());
+            for (TheMovieDbModel theMovieDbModel : response.getBody().getResults()) {
+                Optional<MovieEntity> existMovie = this.movieRepository.findByIdTheMovieDb(theMovieDbModel.getId());
+                if (existMovie.isEmpty() &&
+                        (theMovieDbModel.getBackdrop_path() != null && !theMovieDbModel.getBackdrop_path().isEmpty()) &&
+                        (theMovieDbModel.getPoster_path() != null && !theMovieDbModel.getPoster_path().isEmpty()) &&
+                        (theMovieDbModel.getOverview() != null && !theMovieDbModel.getOverview().isEmpty())) {
+                    result.add(theMovieDbModel);
+                }
+            }
+            logger.info("Number of new movies (not present in DB) added: {}", result.size());
+        } else {
+            logger.warn("No results returned from the MovieDB API for page {}", randomPage);
+        }
+
+        return result;
+    }
+
+    public Response<String> addSingleMovieFromTheMovieDb(String typeMovie, int id) {
+        int movieAdded = this.movieService.addSingleMovieFromDbApi(typeMovie,id);
+        if(movieAdded > 0) {
+            logger.info("Movie added");
+            return Utils.createResponse(HttpStatus.OK.value(), "Movie added");
+        }
+        logger.info("Movie NOT added");
+        return Utils.createResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Movie Not Added");
     }
 }
