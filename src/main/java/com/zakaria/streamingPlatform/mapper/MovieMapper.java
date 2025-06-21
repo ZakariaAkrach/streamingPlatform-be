@@ -5,6 +5,9 @@ import com.zakaria.streamingPlatform.entities.MovieEntity;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class MovieMapper {
     private final ModelMapper modelMapper;
@@ -24,5 +27,9 @@ public class MovieMapper {
 
     public MovieDTO convertToModel(MovieEntity movieEntity) {
         return modelMapper.map(movieEntity, MovieDTO.class);
+    }
+
+    public List<MovieDTO> convertToModel(List<MovieEntity> movieEntity) {
+        return movieEntity.stream().map(this::convertToModel).collect(Collectors.toList());
     }
 }

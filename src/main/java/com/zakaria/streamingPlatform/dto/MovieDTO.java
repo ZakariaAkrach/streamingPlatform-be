@@ -25,6 +25,15 @@ public class MovieDTO {
     public MovieDTO() {
     }
 
+    public MovieDTO(Long id, String title, LocalDate releaseDate, boolean active, String language, String posterPath) {
+        this.id = id;
+        this.title = title;
+        this.releaseDate = releaseDate;
+        this.active = active;
+        this.language = language;
+        this.posterPath = posterPath;
+    }
+
     public MovieDTO(Long id, int idTheMovieDb, TypeMovie typeMovie, String language, String title, String description,
                     String posterPath, String backdropPath, LocalDate releaseDate, float popularity, boolean active,
                     LocalDate dateCreated, List<GenresDTO> genres, List<MovieCastDTO> movieCast, int runtime) {

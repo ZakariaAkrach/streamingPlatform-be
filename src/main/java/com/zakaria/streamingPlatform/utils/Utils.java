@@ -65,7 +65,7 @@ public final class Utils {
         response.setStatus(status);
         response.setMessage(message);
         response.setData(data);
-        response.setPage(page + 1); //add one human readable
+        response.setPage(page);
         response.setSize(size);
         response.setTotalPages(totalPages);
         response.setTotalElements(totalElements);

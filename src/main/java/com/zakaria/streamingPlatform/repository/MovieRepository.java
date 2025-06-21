@@ -19,8 +19,15 @@ public interface MovieRepository extends JpaRepository<MovieEntity, Long> {
     Optional<MovieEntity> findByIdTheMovieDb(int idTheMovieDb);
 
     Page<MovieEntity> findAllByTypeMovie(TypeMovie typeMovie, Pageable pageable);
+
     List<MovieEntity> findAllByTypeMovie(TypeMovie typeMovie);
 
     @Query("SELECT m FROM MovieEntity m WHERE m.typeMovie = :typeMovie ORDER BY m.popularity DESC ")
     List<MovieEntity> trendingByTypeMovie(@Param("typeMovie") TypeMovie typeMovie, Pageable pageable);
+
+
+    //Content-Manager
+    Page<MovieEntity> findByTypeMovie(@Param("typeMovie") TypeMovie typeMovie, Pageable pageable);
+
+    Page<MovieEntity> findByTypeMovieAndTitleContainingIgnoreCase(@Param("typeMovie") TypeMovie typeMovie, @Param("title") String title, Pageable pageable);
 }
