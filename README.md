@@ -2,6 +2,8 @@
 This is a streaming platform web application built with **React** (frontend) and **Spring Boot** (backend).
 I started this project recently to learn full-stack development, deepen my knowledge of Spring Boot, and improve my React skills.
 
+> This repository is part of a full-stack application. You can find the frontend [here](https://github.com/ZakariaAkrach/streamingPlatform-fe).
+
 ## Project Overview
 The platform supports three roles:
 - **User:**
