@@ -25,6 +25,12 @@ public class MovieDTO {
     public MovieDTO() {
     }
 
+    public MovieDTO(Long id, String title, String posterPath) {
+        this.id = id;
+        this.title = title;
+        this.posterPath = posterPath;
+    }
+
     public MovieDTO(Long id, String title, LocalDate releaseDate, boolean active, String language, String posterPath) {
         this.id = id;
         this.title = title;
