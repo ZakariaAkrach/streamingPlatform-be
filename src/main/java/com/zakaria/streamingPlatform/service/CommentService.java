@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -175,5 +176,32 @@ public class CommentService {
         }
         logger.info("Movie not found by id {}", commentDTO.getMovieId());
         return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Failed not found movie", null, null);
+    }
+
+    @Transactional
+    public Response<String> deleteCommentById(Long id) {
+        Optional<CommentEntity> existingComment = commentRepository.findById(id);
+        if (existingComment.isPresent()) {
+
+            List<CommentEntity> childComments = commentRepository.findByParentComment(existingComment.get());
+            try {
+                for (CommentEntity childComment : childComments) {
+                    deleteById(childComment.getId());
+                }
+
+                deleteById(id);
+                return Utils.createResponse(HttpStatus.OK.value(), "Deleted comment successfully");
+            } catch (Exception e) {
+                logger.error("Error while deleting comment ID {} successfully, cause: {}", id, e.getMessage());
+                return Utils.createResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to delete comment");
+            }
+        }
+        logger.info("Comment ID {} not found", id);
+        return Utils.createResponse(HttpStatus.NOT_FOUND.value(), "Comment not found");
+    }
+
+    private void deleteById(Long id) {
+        commentRepository.deleteById(id);
+        logger.info("Deleted comment ID {}", id);
     }
 }

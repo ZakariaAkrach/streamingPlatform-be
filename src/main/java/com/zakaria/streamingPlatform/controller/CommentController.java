@@ -42,4 +42,9 @@ public class CommentController {
     public Response<UserCommentLikeDTO> likeComment(@RequestBody UserCommentLikeDTO userCommentLikeDTO) {
         return commentService.likeComment(userCommentLikeDTO);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public Response<String> deleteCommentById(@PathVariable(name = "id") Long id) {
+        return commentService.deleteCommentById(id);
+    }
 }

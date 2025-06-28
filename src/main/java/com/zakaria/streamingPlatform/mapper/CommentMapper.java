@@ -29,15 +29,23 @@ public class CommentMapper {
     }
 
     public CommentDTO convertToModel(CommentEntity commentEntity) {
+        CommentDTO commentDTO;
+
         if (commentEntity.getParentComment() != null) {
             modelMapper.typeMap(CommentEntity.class, CommentDTO.class)
                     .addMappings(mapper -> mapper.skip(CommentDTO::setParentComment));
-            CommentDTO commentDTO = modelMapper.map(commentEntity, CommentDTO.class);
+            commentDTO = modelMapper.map(commentEntity, CommentDTO.class);
             commentDTO.setParentComment(commentEntity.getParentComment().getId());
-
-            return commentDTO;
+        } else {
+            commentDTO = modelMapper.map(commentEntity, CommentDTO.class);
         }
-        return modelMapper.map(commentEntity, CommentDTO.class);
+
+        if (commentEntity.getMovie() != null) {
+            commentDTO.setMovieId(commentEntity.getMovie().getId());
+            commentDTO.setMovieTitle(commentEntity.getMovie().getTitle());
+        }
+
+        return commentDTO;
     }
 
     public List<CommentDTO> convertToModel(List<CommentEntity> commentEntities) {

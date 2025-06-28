@@ -19,4 +19,9 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
     @Modifying
     @Query("DELETE FROM CommentEntity uml WHERE uml.movie.id = :movieId")
     void deleteAllByMovieId(@Param("movieId") Long movieId);
+
+    @Query("SELECT c FROM CommentEntity c WHERE c.user.id = :id")
+    List<CommentEntity> getAllCommentByUserId(@Param("id") Long id);
+
+    List<CommentEntity> findByParentComment(CommentEntity parentComment);
 }

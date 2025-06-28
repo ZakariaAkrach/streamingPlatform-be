@@ -16,11 +16,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("content-manager")
-public class MovieContentManagerController {
+public class DashboardMovieContentManagerController {
 
     private final MovieContentManagerService movieContentManagerService;
 
-    public MovieContentManagerController(MovieContentManagerService movieContentManagerService) {
+    public DashboardMovieContentManagerController(MovieContentManagerService movieContentManagerService) {
         this.movieContentManagerService = movieContentManagerService;
     }
 

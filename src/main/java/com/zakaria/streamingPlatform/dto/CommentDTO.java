@@ -8,6 +8,7 @@ public class CommentDTO {
     private String content;
     private Boolean approved;
     private Long movieId;
+    private String movieTitle;
     private Long parentComment; //Nested comments
     private UserPublicDTO user;
     private Boolean likedByCurrentUser;
@@ -15,13 +16,14 @@ public class CommentDTO {
     public CommentDTO() {
     }
 
-    public CommentDTO(Long id, LocalDateTime date, String content, Boolean approved,
-                      Long movieId, Long parentComment, UserPublicDTO user, Boolean likedByCurrentUser) {
+    public CommentDTO(Long id, LocalDateTime date, String content, Boolean approved, Long movieId, String movieTitle,
+                      Long parentComment, UserPublicDTO user, Boolean likedByCurrentUser) {
         this.id = id;
         this.date = date;
         this.content = content;
         this.approved = approved;
         this.movieId = movieId;
+        this.movieTitle = movieTitle;
         this.parentComment = parentComment;
         this.user = user;
         this.likedByCurrentUser = likedByCurrentUser;
@@ -67,6 +69,14 @@ public class CommentDTO {
         this.movieId = movieId;
     }
 
+    public String getMovieTitle() {
+        return movieTitle;
+    }
+
+    public void setMovieTitle(String movieTitle) {
+        this.movieTitle = movieTitle;
+    }
+
     public Long getParentComment() {
         return parentComment;
     }
@@ -83,7 +93,7 @@ public class CommentDTO {
         this.user = user;
     }
 
-    public Boolean isLikedByCurrentUser() {
+    public Boolean getLikedByCurrentUser() {
         return likedByCurrentUser;
     }
 
