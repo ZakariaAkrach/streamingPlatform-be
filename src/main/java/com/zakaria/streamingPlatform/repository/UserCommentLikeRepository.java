@@ -12,4 +12,8 @@ public interface UserCommentLikeRepository extends JpaRepository<UserCommentLike
     @Modifying
     @Query("DELETE FROM UserCommentLikeEntity uml WHERE uml.comment.movie.id = :movieId")
     void deleteAllByMovieId(@Param("movieId") Long movieId);
+
+    @Modifying
+    @Query("DELETE FROM UserCommentLikeEntity uml WHERE uml.userCommentKey.commentId = :commentId")
+    void deleteAllByCommentId(@Param("commentId") Long commentId);
 }

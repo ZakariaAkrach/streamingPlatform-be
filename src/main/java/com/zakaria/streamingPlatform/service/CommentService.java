@@ -186,11 +186,13 @@ public class CommentService {
             List<CommentEntity> childComments = commentRepository.findByParentComment(existingComment.get());
             try {
                 for (CommentEntity childComment : childComments) {
+                    userCommentLikeRepository.deleteAllByCommentId(childComment.getId());
                     deleteById(childComment.getId());
                 }
-
+                userCommentLikeRepository.deleteAllByCommentId(id);
                 deleteById(id);
                 return Utils.createResponse(HttpStatus.OK.value(), "Deleted comment successfully");
+
             } catch (Exception e) {
                 logger.error("Error while deleting comment ID {} successfully, cause: {}", id, e.getMessage());
                 return Utils.createResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Failed to delete comment");
