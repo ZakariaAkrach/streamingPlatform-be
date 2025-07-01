@@ -5,6 +5,8 @@ import com.zakaria.streamingPlatform.dto.UserDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class UserMapper {
     private final ModelMapper modelMapper;
@@ -19,5 +21,9 @@ public class UserMapper {
 
     public UserDTO convertToModel(UserEntity userEntity) {
         return modelMapper.map(userEntity, UserDTO.class);
+    }
+
+    public List<UserDTO> convertToModel(List<UserEntity> userEntity) {
+        return userEntity.stream().map(this::convertToModel).toList();
     }
 }
