@@ -1,16 +1,18 @@
 package com.zakaria.streamingPlatform.controller;
 
+import com.zakaria.streamingPlatform.dto.MovieWithFavoriteCountDTO;
 import com.zakaria.streamingPlatform.dto.UserDTO;
+import com.zakaria.streamingPlatform.entities.TypeMovie;
+import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponsePagination;
 import com.zakaria.streamingPlatform.service.DashboardAdminService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin-dashboard")
@@ -34,5 +36,12 @@ public class DashboardAdminController {
         Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         return this.dashboardAdminService.getAllUser(pageable, username);
+    }
+
+    @GetMapping("/get-top-5-content/{typeMovie}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Response<List<MovieWithFavoriteCountDTO>> getTopFiveFavoriteContent(@PathVariable(name = "typeMovie") TypeMovie typeMovie,
+                                                                               @RequestParam(defaultValue = "0") int topNumber) {
+        return this.dashboardAdminService.getTopFiveFavoriteContent(typeMovie, topNumber);
     }
 }

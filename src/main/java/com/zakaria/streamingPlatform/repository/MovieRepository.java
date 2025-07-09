@@ -30,4 +30,12 @@ public interface MovieRepository extends JpaRepository<MovieEntity, Long> {
     Page<MovieEntity> findByTypeMovie(@Param("typeMovie") TypeMovie typeMovie, Pageable pageable);
 
     Page<MovieEntity> findByTypeMovieAndTitleContainingIgnoreCase(@Param("typeMovie") TypeMovie typeMovie, @Param("title") String title, Pageable pageable);
+
+    @Query("SELECT m.id, m.title, COUNT(umf) as favoriteCount " +
+            "FROM MovieEntity m " +
+            "LEFT JOIN UserMovieFavoriteEntity umf ON umf.userMovieKey.movieId = m.id " +
+            "WHERE m.typeMovie = :typeMovie AND umf.favorite = true " +
+            "GROUP BY m " +
+            "ORDER BY favoriteCount DESC")
+    List<Object[]> topFiveFavoriteContent(@Param("typeMovie") TypeMovie typeMovie, Pageable pageable);
 }
