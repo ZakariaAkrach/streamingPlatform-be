@@ -5,6 +5,7 @@ import com.zakaria.streamingPlatform.entities.Role;
 import java.time.LocalDate;
 
 public class UserDTO {
+    private Long id;
     private String username;
     private String email;
     private String password;
@@ -15,13 +16,22 @@ public class UserDTO {
     public UserDTO() {
     }
 
-    public UserDTO(String username, String email, String password, Role role, boolean active, LocalDate dateCreated) {
+    public UserDTO(Long id, String username, String email, String password, Role role, boolean active, LocalDate dateCreated) {
+        this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.role = role;
         this.active = active;
         this.dateCreated = dateCreated;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getUsername() {
