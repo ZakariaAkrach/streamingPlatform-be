@@ -44,4 +44,17 @@ public class DashboardAdminController {
                                                                                @RequestParam(defaultValue = "0") int topNumber) {
         return this.dashboardAdminService.getTopFiveFavoriteContent(typeMovie, topNumber);
     }
+
+    @PutMapping("/change-users-status/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Response<String> changeUserStatus(@PathVariable(name = "id") Long id,
+                                             @RequestParam(defaultValue = "false") boolean userStatus) {
+        return this.dashboardAdminService.changeUserStatus(id, userStatus);
+    }
+
+    @PostMapping("/register")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Response<String> register(@RequestBody UserDTO userDTO) {
+        return dashboardAdminService.register(userDTO);
+    }
 }
