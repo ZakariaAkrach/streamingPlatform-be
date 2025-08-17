@@ -2,6 +2,8 @@
 
 A personal streaming platform inspired by Netflix, built with **React** and **Spring Boot**. This project is for learning and demonstration purposes — no actual movies are included for privacy reasons. Users can browse TV shows and movies, view details, and interact with content, while different user roles manage the platform with specific permissions.
 
+For the frontend part of the project, visit the repository [qui](https://github.com/ZakariaAkrach/streamingPlatform-fe).
+
 ---
 
 ## Features
