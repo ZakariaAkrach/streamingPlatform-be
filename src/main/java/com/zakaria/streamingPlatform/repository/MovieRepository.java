@@ -18,7 +18,25 @@ public interface MovieRepository extends JpaRepository<MovieEntity, Long> {
 
     Optional<MovieEntity> findByIdTheMovieDb(int idTheMovieDb);
 
-    Page<MovieEntity> findAllByTypeMovie(TypeMovie typeMovie, Pageable pageable);
+
+
+    @Query("SELECT DISTINCT m FROM MovieEntity m " +
+            "LEFT JOIN m.genres g " +
+            "WHERE (:typeMovie IS NULL OR m.typeMovie = :typeMovie) " +
+            "AND (:title IS NULL OR LOWER(m.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
+            "AND (:genres IS NULL OR g.name IN :genres) " +
+            "AND (:languages IS NULL OR LOWER(m.language) IN :languages) ")
+    Page<MovieEntity> findFiltered(
+            @Param("typeMovie") TypeMovie typeMovie,
+            @Param("title") String title,
+            @Param("genres") List<String> genres,
+            @Param("languages") List<String> languages,
+            Pageable pageable);
+
+    Page<MovieEntity> findAllByTypeMovieAndTitleContainingIgnoreCase(TypeMovie typeMovie, String title, Pageable pageable);
+
+
+
 
     List<MovieEntity> findAllByTypeMovie(TypeMovie typeMovie);
 

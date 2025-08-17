@@ -3,6 +3,7 @@ package com.zakaria.streamingPlatform.controller;
 import com.zakaria.streamingPlatform.dto.MovieDTO;
 import com.zakaria.streamingPlatform.dto.UserMovieFavoriteDTO;
 import com.zakaria.streamingPlatform.dto.UserMovieLikeDTO;
+import com.zakaria.streamingPlatform.entities.TypeMovie;
 import com.zakaria.streamingPlatform.response.Response;
 import com.zakaria.streamingPlatform.response.ResponsePagination;
 import com.zakaria.streamingPlatform.service.MovieService;
@@ -32,11 +33,12 @@ public class MovieController {
     public ResponsePagination<MovieDTO> getAllMovie(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-        return movieService.getAllMovie(pageable);
+            @RequestParam(defaultValue = "MOVIE") TypeMovie typeMovie,
+            @RequestParam(defaultValue = "") String title,
+            @RequestParam(required = false) List<String> genres,
+            @RequestParam(required = false) List<String> languages) {
+        Pageable pageable = PageRequest.of(page, size);
+        return movieService.getAllMovie(pageable, typeMovie, title, genres, languages);
     }
 
     @GetMapping("/get-trending-movie")

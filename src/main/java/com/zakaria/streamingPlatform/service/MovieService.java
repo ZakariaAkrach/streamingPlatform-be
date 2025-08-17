@@ -408,11 +408,11 @@ public class MovieService {
         return genresDTO;
     }
 
-    @Cacheable("allMovie")
-    public ResponsePagination<MovieDTO> getAllMovie(Pageable pageable) {
+    @Cacheable("allContent")
+    public ResponsePagination<MovieDTO> getAllMovie(Pageable pageable, TypeMovie typeMovie, String title, List<String> genres, List<String> languages) {
         List<MovieDTO> movieDTO;
 
-        Page<MovieEntity> movieEntityPage = movieRepository.findAllByTypeMovie(TypeMovie.MOVIE, pageable);
+        Page<MovieEntity> movieEntityPage = movieRepository.findFiltered(typeMovie, title, genres, languages, pageable);
 
         if (!movieEntityPage.isEmpty()) {
             movieDTO = movieEntityPage.get()
