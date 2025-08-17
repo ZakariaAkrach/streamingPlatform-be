@@ -46,10 +46,10 @@ A personal streaming platform inspired by Netflix, built with **React** and **Sp
 
 ## Technology Stack
 
-- **Frontend:** React, React Router, Axios, Tailwind CSS (optional styling framework)
+- **Frontend:** React, React Router, Axios
 - **Backend:** Spring Boot, Spring Security, OAuth2 (Google), JWT
-- **Database:** H2 / MySQL (or your choice)
-- **External APIs:** [The Movie Database (TMDb)](https://www.themoviedb.org/documentation/api)
+- **Database:** MySQL
+- **External APIs:** [The Movie Database (TMDb) (https://www.themoviedb.org)]
 - **Authentication & Authorization:** OAuth2 login with Google, JWT-based role management
 
 ---
@@ -80,11 +80,3 @@ A personal streaming platform inspired by Netflix, built with **React** and **Sp
   - `ROLE_ADMIN`
   - `ROLE_CONTENT_MANAGER`
 
----
-
-## Installation & Running Locally
-
-1. Clone the repository:  
-   ```bash
-   git clone https://github.com/yourusername/streaming-platform.git
-   cd streaming-platform
