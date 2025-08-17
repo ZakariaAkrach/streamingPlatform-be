@@ -32,7 +32,7 @@ A personal streaming platform inspired by Netflix, built with **React** and **Sp
     - TV show or movie
   - Table of all users with search and filter options
   - Create, disable, or re-enable users
-  - Disabled users see a message: “You are disabled, contact administration.”
+  - Disabled users see a message: “Account deactivated. Please contact administration.”
 
 ### Content Manager Features
 - Manage content imported from **The Movie Database (TMDb)**:
